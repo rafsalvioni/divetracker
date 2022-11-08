@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DiveTracker</title>
+  <!-- <link rel="manifest" href="manifest.json"> -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="DiveTracker">
+  <meta name="apple-mobile-web-app-title" content="DiveTracker">
+  <meta name="msapplication-starturl" content="/index.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<header>
+</header>
+<main>
+<script type="module">
+    import {Point, Angle, Segment} from './lib/geo.js';
+    var pos = new Point(-23.5784, -46.605);
+    var start = new Point(-23.5704, -46.6112);
+    var seg = new Segment(pos, start);
+    var north = 85;
+    var ret = Angle.use(-(north - seg.dir));
+    console.log(seg.dir);
+    console.log(ret.pos().deg);
+    console.log(ret.switch().pos().deg);
+</script>
+</main>
+<footer>
+</footer>
+</body>
+</html>

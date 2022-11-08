@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DiveTracker</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="DiveTracker">
+  <meta name="apple-mobile-web-app-title" content="DiveTracker">
+  <meta name="msapplication-starturl" content="/index.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="./bin/app.js" type="module" defer></script>
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<header>
+</header>
+<main>
+  <div id="check"><h1>Loading...</h1></div>
+  <div id="main" style="display: none">
+    <svg id="nav"></svg>
+    <table id="system">
+      <tr>
+        <td>Status:</td>
+        <td id="status" colspan="3"></td>
+      </tr>
+      <tr>
+        <td>Position:</td>
+        <td id="position" colspan="3"></td>
+      </tr>
+      <tr>
+        <td>Accuracy:</td>
+        <td id="accur" colspan="3"></td>
+      </tr>
+      <tr>
+        <td>Provider:</td>
+        <td id="mode" colspan="2"></td>
+        <td><input type="range" min="0" max="1" id="forceImu" step="1" style="width:30px"></td>
+      </tr>
+    </table>
+    <table id="track">
+      <tr>
+        <td>Duration:</td>
+        <td id="time" colspan="3"></td>
+      </tr>
+      <tr>
+        <td>Dist.:</td>
+        <td id="dist"></td>
+        <td>Speed:</td>
+        <td id="speed"></td>
+      </tr>
+      <tr>
+        <td>To Point:</td>
+        <td id="dest" colspan="3"></td>
+      </tr>
+    </table>
+    <div id="botoes">
+      <button type="button" id="btStartTrack">Start</button>
+      <button type="button" id="btStopTrack">Stop</button>
+      <button type="button" id="btGpx">Save GPX</button>
+      <button type="button" id="btCleanGpx">Clean GPX</button>
+    </div>
+  </div>
+</main>
+<footer>
+</footer>
+</body>
+</html>

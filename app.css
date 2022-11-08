@@ -1,0 +1,53 @@
+body {
+    background-color: #000;
+    color: #fff;
+    font-size: 120%;
+}
+
+button {
+    font-size: 110%;
+    background-color: #ccc; /* Green */
+    border: none;
+    padding: 10px 13px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+}
+
+#main {
+    display: grid;
+}
+#nav {
+    grid-area: map;
+}
+#system {
+    grid-area: system;
+}
+#track {
+    grid-area: track;
+    border: solid 2px #ff0000;
+}
+#botoes {
+    grid-area: botoes;
+    margin-top: 15px;
+}
+
+@media (orientation: portrait) {
+    #main {
+        grid-template-areas:
+            'map'
+            'system'
+            'track'
+            'botoes';
+    }
+}
+
+@media (orientation: landscape) {
+    #main {
+        grid-template-areas:
+            'map system'
+            'map track'
+            'map botoes'
+    }
+}

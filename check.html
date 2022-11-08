@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DiveTracker Check</title>
+</head>
+<body>
+<header>
+</header>
+<main>
+  <div id="main">
+    <table>
+      <tr>
+        <td>Browser:</td>
+        <td id="browser"></td>
+      </tr>
+      <tr>
+        <td>Browser Support:</td>
+        <td id="browserSupport"></td>
+      </tr>
+      <tr>
+        <td>GPS:</td>
+        <td id="gps"></td>
+      </tr>
+      <tr>
+        <td>Compass:</td>
+        <td id="compass"></td>
+      </tr>
+      <tr>
+        <td>Accelerometer:</td>
+        <td id="accel"></td>
+      </tr>
+  </div>
+</main>
+<footer>
+</footer>
+<script type="text/javascript">
+var browser    = document.getElementById("browser");
+var browserSup = document.getElementById("browserSupport");
+var gps = document.getElementById("gps");
+var compass = document.getElementById("compass");
+var accel = document.getElementById("accel");
+
+try {
+	browser.innerHTML = navigator.appName + ' ' + navigator.appVersion;
+	var sup = ('ondevicemotion' in window) &&
+	  ('ondeviceorientationabsolute' in window) &&
+	  ('geolocation' in navigator);
+
+	browserSup.innerHTML = sup ? 'OK' : 'ERROR';
+	if (sup) {
+		window.addEventListener('devicemotion', function(e) {
+			accel.innerHTML = e.acceleration.y != null ? 'OK (' + e.acceleration.y + ')' : 'ERROR (' + JSON.stringify(e) + ')';
+		});
+		window.addEventListener('deviceorientationabsolute', function (e) {
+			compass.innerHTML = e.alpha != null ? 'OK (' + e.alpha + ')' : 'ERROR (' + JSON.stringify(e) + ')';
+		});
+		navigator.geolocation.getCurrentPosition(
+			function (e) {
+				gps.innerHTML = 'OK (' + e.coords.latitude + ',' + e.coords.longitude + ')';
+			},
+			function(e) {
+				gps.innerHTML = 'ERROR (' + e.message + ')';
+			},{
+				enableHighAccuracy: true
+			}
+		);
+	}
+	else {
+		accel.innerHTML = 'NOT SUPPORTED';
+		compass.innerHTML = 'NOT SUPPORTED';
+		gps.innerHTML = 'NOT SUPPORTED';
+	}
+}
+catch (e) {
+	alert('ECMA Error: ' + e);
+}
+</script>
+</body>
+</html>
