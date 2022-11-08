@@ -1,5 +1,5 @@
 const CACHE_NAME = 'V0';
-const root = '/';
+const root = '/divetracker/';
 const STATIC_CACHE_URLS = [
     root,
     root + 'app.css',
