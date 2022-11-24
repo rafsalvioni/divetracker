@@ -118,6 +118,10 @@ class MainActivity
             let bearing = orient.roundAngle(e.detail.compG);
 			me.map.setBearing(bearing);
         });
+        // Adds GPX POI when added POI to map
+        me.map.addEventListener('poi', (e) => {
+            me.gpx.addWayPoint(e.detail);
+        });
     }
     
     run() {
@@ -135,12 +139,6 @@ class MainActivity
         });
         document.getElementById('btCleanGpx').addEventListener('click', () => {
             app.cleanGpx();
-        });
-        document.getElementById('position').addEventListener('dblclick', () => {
-            app.registerPoi();
-        });
-        document.getElementById('dest').addEventListener('click', () => {
-            app.changeDest();
         });
         document.getElementById('forceImu').value = !!conf.track.forceImu ? '1' : '0';
     }
@@ -182,10 +180,6 @@ class MainActivity
             me.gpx.addPos(e.point, e.target.id);
             me.map.setPosition(e.point, me.provider.last.accur);
         });
-        track.addEventListener('poi', (e) => {
-            me.gpx.addWayPoint(e.point);
-            me.map.addPoint(e.point);
-        });
         // Sets position provider to auto update Track
         track.updateFrom(this.provider, conf.track.calcPos);
         this.track = track;
@@ -203,21 +197,6 @@ class MainActivity
             if (this.gpx.hasContents() && window.confirm('Save GPX now?')) {
                 this.getGpx();
             }
-        }
-    }
-
-    registerPoi()
-    {
-        if (this.track) {
-            this.track.registerPoi();
-        }
-    }
-
-    changeDest()
-    {
-        if (this.track) {
-            let n = this.track.poi.length + 1;
-            this.dest = (this.dest + 1) % n;
         }
     }
 
@@ -244,12 +223,6 @@ class MainActivity
         };
         let intrack = !!this.track;
         if (intrack) {
-            if (this.dest == 0) {
-                model.dest = '(#0) ' + ViewHelper.formatTarget(this.track.toStart(), conf.track.minDist);
-            }
-            else {
-                model.dest = "(#{0}) ".format(this.dest) + ViewHelper.formatTarget(this.track.toPOI(this.dest - 1), conf.track.minDist);
-            }
             model.status = 'TRACKING';
             model.speed = ViewHelper.formatSpeed(this.track.getCurrentSpeed());
             model.dist = ViewHelper.formatDistance(this.track.dist);
@@ -257,7 +230,6 @@ class MainActivity
         }
         else {
             model.status = 'IDLE';
-            model.dest = ''
             model.speed = '0 m/s';
             model.dist = '0 m';
             model.time = ViewHelper.formatTime(0);
