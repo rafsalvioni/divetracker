@@ -1,4 +1,4 @@
-const CACHE_NAME = 'V0';
+const CACHE_NAME = 'V1';
 const root = '/divetracker/';
 const STATIC_CACHE_URLS = [
     root,

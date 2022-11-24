@@ -2,7 +2,7 @@
     "name": "DiveTracker - A position tracker for scuba divers!",
     "short_name": "DiveTracker",
     "lang": "en-US",
-    "start_url": "https://rafsalvioni.github.io/divetracker/",
+    "start_url": "/divetracker/",
     "display": "standalone",
     "icons": [
         {
