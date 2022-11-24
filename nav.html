@@ -12,7 +12,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="theme-color" content="#000000">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="./lib/map.js" type="module" defer></script>
   <link rel="stylesheet" href="./app.css">
 </head>
 <body>
@@ -25,5 +24,14 @@
 </main>
 <footer>
 </footer>
+<script type="module">
+  import { DiveMap } from './lib/map.js';
+  import { Point } from './lib/geo.js';
+  var map = new DiveMap(document.getElementById('nav'));
+  map.addPoint(new Point(-23.325, -46.788));
+  map.addPoint(new Point(-23.3255, -46.7885));
+  map.setPosition(new Point(-23.32, -46.788));
+  //map.setBearing(90);
+</script>
 </body>
 </html>
