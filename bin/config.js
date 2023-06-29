@@ -13,7 +13,7 @@ const defaultConf = {
         minDist: 5, // Minimum distance to consider stay in a location
     },
     main: {
-        updateFreq: 500 // Time, in millis, to update view
+        updateFreq: 1000 // Time, in millis, to update view
     }
 };
 
