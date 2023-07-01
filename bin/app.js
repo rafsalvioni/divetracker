@@ -140,6 +140,9 @@ class MainActivity
         document.getElementById('btCleanGpx').addEventListener('click', () => {
             app.cleanGpx();
         });
+        document.getElementById('btCalibrate').addEventListener('click', () => {
+            motion.calibrate(true);
+        });
         document.getElementById('forceImu').value = !!conf.track.forceImu ? '1' : '0';
     }
 
@@ -238,6 +241,7 @@ class MainActivity
         model.btGpx = !intrack && this.gpx.hasContents();
         model.btCleanGpx = model.btGpx;
         model.btStopTrack = !!intrack && !!gps.active;
+        model.btCalibrate = !intrack;
 
         for (var attr in model) {
             let el = document.getElementById(attr);
