@@ -7,6 +7,7 @@ const STATIC_CACHE_URLS = [
     root + 'bin/config.js',
     root + 'lib/dist.js',
     root + 'lib/geo.js',
+    root + 'lib/trigo.js',
     root + 'lib/gpx.js',
     root + 'lib/magvar.js',
     root + 'lib/map.js',
