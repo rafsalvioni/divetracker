@@ -96,7 +96,6 @@ class MainActivity
         this.map = new DiveMap(document.getElementById('nav'));
         // Starts GPX writer
         this.gpx = new GpxWriter();
-        this.gpx.create();
 
         // Add listener for auto start
         gps.addEventListener('active', async (e) => {
@@ -142,6 +141,10 @@ class MainActivity
         });
         document.getElementById('btCalibrate').addEventListener('click', () => {
             motion.calibrate(true);
+        });
+        document.getElementById('btDistCounter').addEventListener('click', () => {
+            ImuProvider.distCounter(true);
+            location.reload();
         });
         document.getElementById('forceImu').value = !!conf.track.forceImu ? '1' : '0';
     }
@@ -242,6 +245,7 @@ class MainActivity
         model.btCleanGpx = model.btGpx;
         model.btStopTrack = !!intrack && !!gps.active;
         model.btCalibrate = !intrack;
+        model.btDistCounter = !intrack;
 
         for (var attr in model) {
             let el = document.getElementById(attr);
