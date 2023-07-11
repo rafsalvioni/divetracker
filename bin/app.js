@@ -121,7 +121,9 @@ class MainActivity
         me.map.addEventListener('poi', (e) => {
             me.gpx.addWayPoint(e.detail);
         });
-    }
+        // Check accel calibration
+        motion.calibrate();
+     }
     
     run() {
         this._updateView();
