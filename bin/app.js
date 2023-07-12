@@ -191,7 +191,6 @@ class MainActivity
         // Sets position provider to auto update Track
         track.updateFrom(this.provider, conf.track.calcPos);
         this.track = track;
-        this.dest = 0; // Default dest
     }
 
     stopTrack()
@@ -232,9 +231,9 @@ class MainActivity
         let intrack = !!this.track;
         if (intrack) {
             model.status = 'TRACKING';
-            model.speed = ViewHelper.formatSpeed(this.track.getCurrentSpeed());
+            model.speed = ViewHelper.formatSpeed(this.track.curSpeed);
             model.dist = ViewHelper.formatDistance(this.track.dist);
-            model.time = ViewHelper.formatTime(this.track.getDuration());
+            model.time = ViewHelper.formatTime(this.track.duration);
         }
         else {
             model.status = 'IDLE';
