@@ -1,5 +1,5 @@
 import { GpsProvider as gps, FusionProvider as fus, ImuProvider } from "../lib/position.js";
-import { Point, Track } from "../lib/geo.js";
+import { GeoPoint, Track } from "../lib/geo.js";
 import { GpxWriter } from "../lib/gpx.js";
 import { MotionService as motion, OrientationService as orient } from "../lib/sensor.js";
 import { DiveMap } from "../lib/map.js";
@@ -10,7 +10,7 @@ const ViewHelper = {
     /**
      * 
      * @param {number} d 
-     * @returns String
+     * @returns string
      */
     formatDistance: (d) =>{
         if (d == null) {
@@ -41,8 +41,8 @@ const ViewHelper = {
  
     /**
      * 
-     * @param {Point} p 
-     * @returns String
+     * @param {GeoPoint} p 
+     * @returns string
      */
     formatPosition: (p) => {
         return p.lat + ', ' + p.lon;
@@ -51,7 +51,7 @@ const ViewHelper = {
     /**
      * 
      * @param {Segment} s 
-     * @returns String
+     * @returns string
      */
     formatTarget: (s, r) => {
         if (s.dist <= r) {
@@ -66,7 +66,7 @@ const ViewHelper = {
     /**
      * 
      * @param {number} s 
-     * @returns String
+     * @returns string
      */
     formatSpeed: (s) => {
         return ViewHelper.formatDistance(s) + '/s';
