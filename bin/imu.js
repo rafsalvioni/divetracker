@@ -173,6 +173,7 @@ class IMUActivity
     {
         let collecting = this.peakM.active && this.peakY.active;
         let sensor = !!motion.active;
+        let hasOffset = !!conf.imu.accelOffset;
         let model = {};
         if (collecting) {
             model.status = 'RECORDING';
@@ -183,7 +184,7 @@ class IMUActivity
         else {
             model.status = 'IDLE';
         }
-        model.btStart = sensor && !collecting;
+        model.btStart = sensor && !collecting && hasOffset;
         model.btStop  = collecting;
         model.btSave  = !collecting && !!this.result;
         model.btReset = !collecting;

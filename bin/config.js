@@ -8,7 +8,7 @@ const defaultConf = {
         activeFreq: 10000, // Time, in millis, to consider GPS signal lost
     },
     imu: {
-        accelOffset: {x: 0, y: 0, z: 0}, // Accelerator bias
+        accelOffset: false, // Accelerator bias
         compassScale: 10, // Scale to use in compass readings
         stepDist: 0.7, // Average distance by step, in meters
         minInterval: 750, // Min interval between steps, in ms
