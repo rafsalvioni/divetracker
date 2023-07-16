@@ -53,8 +53,8 @@ const ViewHelper = {
      * @param {Segment} s 
      * @returns string
      */
-    formatTarget: (s, r) => {
-        if (s.dist <= r) {
+    formatTarget: (s) => {
+        if (s.dist <= conf.track.minDist) {
             return 'You are here!';
         }
         return "{0}º GN / {1}".format(
@@ -121,8 +121,6 @@ class MainActivity
         me.map.addEventListener('poi', (e) => {
             me.gpx.addWayPoint(e.detail);
         });
-        // Check accel calibration
-        motion.calibrate();
      }
     
     run() {
@@ -142,7 +140,7 @@ class MainActivity
             app.cleanGpx();
         });
         document.getElementById('btCalibrate').addEventListener('click', () => {
-            motion.calibrate(true);
+            location.href = 'imu.html';
         });
         document.getElementById('btDistCounter').addEventListener('click', () => {
             ImuProvider.distCounter(true);

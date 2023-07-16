@@ -3,8 +3,10 @@ const root = '/divetracker/';
 const STATIC_CACHE_URLS = [
     root,
     root + 'app.css',
+    root + 'imu.html',
     root + 'bin/app.js',
     root + 'bin/config.js',
+    root + 'bin/imu.js',
     root + 'lib/dist.js',
     root + 'lib/sfilter.js',
     root + 'lib/geo.js',

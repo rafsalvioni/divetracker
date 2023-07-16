@@ -1,10 +1,21 @@
+/**
+ * Default config
+ * 
+ */
 const defaultConf = {
     gps: {
-        minAccur: 10, // Minimal accuracy to consider GPS
+        minAccur: 10, // Minimal accuracy to trust in GPS
         activeFreq: 10000, // Time, in millis, to consider GPS signal lost
     },
     imu: {
+        accelOffset: {x: 0, y: 0, z: 0}, // Accelerator bias
         compassScale: 10, // Scale to use in compass readings
+        stepDist: 0.7, // Average distance by step, in meters
+        minInterval: 750, // Min interval between steps, in ms
+        peakSensibility: { // Peak detectors sensibility in...
+            y: 3, // ... Y axe
+            m: 2 // ... accel vector magnitude
+        }
     },
     track: {
         calcPos: 5000, // Time, in millis, to update track position
@@ -17,11 +28,18 @@ const defaultConf = {
     }
 };
 
-const configKey = '_config';
+const configKey = '_config_';
 
+/**
+ * Loads a config from localStorage, if there is one.
+ * 
+ * Else, return default config
+ * 
+ * @returns object
+ */
 function loadConfig()
 {
-    let ret = defaultConf;
+    let ret = Object.assign({}, defaultConf);
     if (!window.localStorage) {
         return ret;
     }
@@ -30,28 +48,53 @@ function loadConfig()
         if (saved) {
             ret = Object.assign(ret, JSON.parse(saved));
         }
-        else {
-            //saveConfig(ret);
-        }
     } catch (e) {
         alert('Error reading config... Using the default one');
-        //saveConfig(defaultConf);
+        localStorage.removeItem(configKey);
     }
     return ret;
 }
 
-export function saveConfig(conf)
+/**
+ * Saves current config on localStorage
+ * 
+ * @param {object} append 
+ */
+export function saveConfig(append = {})
 {
     if (!window.localStorage) {
         alert('Unable to save config. Your browser doesn\'t support localStorage');
         return;
     }
-    conf = Object.assign(defaultConf, conf);
-    let exists = !!localStorage.getItem(configKey);
+
+    let conf = Object.assign({}, defaultConf, AppConfig, append);
     localStorage.setItem(configKey, JSON.stringify(conf));
-    if (exists) {
-        alert('Config saved! Please restart app to apply it!');
+    if (localStorage[configKey]) {
+        alert('Config saved! Page will be reloaded');
+        location.reload();
     }
+}
+
+/**
+ * Restores default config
+ * 
+ */
+export function restoreConfig()
+{
+    if (confirm("Do you really restore configuration to default?")) {
+        localStorage.removeItem(configKey);
+        location.reload();
+    }
+}
+
+/**
+ * Returns default config
+ * 
+ * @returns object
+ */
+export function defaultConfig()
+{
+    return defaultConf;
 }
 
 export const AppConfig = loadConfig();
