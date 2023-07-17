@@ -1,5 +1,6 @@
 import { Peak3DistanceCounter as Peak3D, PeakYDistanceCounter as PeakY } from "../lib/dist.js";
 import { MotionService as motion } from "../lib/sensor.js";
+import { Vector } from "../lib/trigo.js";
 import { AppConfig as conf, restoreConfig, saveConfig } from "./config.js";
 
 class IMUActivity
@@ -25,6 +26,7 @@ class IMUActivity
 
         if (e.type == 'step') {
             data.steps++;
+            data.dist += Vector.create(e.detail).size;
             return;
         }
 
@@ -35,25 +37,24 @@ class IMUActivity
             this.collect.freq = parseInt(this.collect.freq + motion.freq) / 2;
         }
 
-        data.max  = Math.max(data.max, e.detail);
-        data.min  = Math.min(data.min, e.detail);
-        data.avg  = (data.max + data.min) / 2;
-        data.conf = (data.max + data.avg) / 2;
+        data.max = Math.max(data.max, e.detail);
+        data.min = Math.min(data.min, e.detail);
+        data.avg = (data.max + data.min) / 2;
     }
 
     start() {
-        this.started = Date.now();
         this.collect = {
             'y' : {
-                max: 0, min: 0, steps: 0
+                max: 0, min: 0, steps: 0, dist: 0
             },
             'm' : {
-                max: 0, min: 0, steps: 0
+                max: 0, min: 0, steps: 0, dist: 0
             },
         };
         this.result = null;
         this.peakY.start();
         this.peakM.start();
+        this.started = Date.now();
     }
 
     stop() {
@@ -83,8 +84,8 @@ class IMUActivity
         }
 
         this.result.suggested.peakSensibility = {
-            y: this.collect.y.conf,
-            m: this.collect.m.conf
+            y: this.collect.y.max * .6,
+            m: this.collect.m.avg * 1.1
         };
         this.result.suggested.minInterval = dt / steps;
 
