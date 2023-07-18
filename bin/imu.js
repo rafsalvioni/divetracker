@@ -1,4 +1,4 @@
-import { Peak3DistanceCounter as Peak3D, PeakYDistanceCounter as PeakY } from "../lib/dist.js";
+import { loadCounter } from "../lib/dist.js";
 import { MotionService as motion } from "../lib/sensor.js";
 import { Vector } from "../lib/trigo.js";
 import { AppConfig as conf, restoreConfig, saveConfig } from "./config.js";
@@ -7,13 +7,9 @@ class IMUActivity
 {
     constructor()
     {
-        this.peakY = new PeakY();
-        this.peakY.addEventListener('sample', this.__listener.bind(this));
-        this.peakY.addEventListener('step', this.__listener.bind(this));
-
-        this.peakM = new Peak3D();
-        this.peakM.addEventListener('sample', this.__listener.bind(this));
-        this.peakM.addEventListener('step', this.__listener.bind(this));
+        this.counter = loadCounter()
+        this.counter.addEventListener('sample', this.__listener.bind(this));
+        this.counter.addEventListener('step', this.__listener.bind(this));
     }
 
     /**
@@ -21,8 +17,7 @@ class IMUActivity
      * @param {Event} e 
      */
     __listener(e) {
-        let type = (e.target instanceof PeakY) ? 'y' : 'm';
-        let data = this.collect[type];
+        let data = this.collect;
 
         if (e.type == 'step') {
             data.steps++;
@@ -30,11 +25,11 @@ class IMUActivity
             return;
         }
 
-        if (!this.collect.freq) {
-            this.collect.freq = motion.freq;
+        if (!data.freq) {
+            data.freq = motion.freq;
         }
         else {
-            this.collect.freq = parseInt(this.collect.freq + motion.freq) / 2;
+            data.freq = parseInt(data.freq + motion.freq) / 2;
         }
 
         data.max = Math.max(data.max, e.detail);
@@ -44,27 +39,19 @@ class IMUActivity
 
     start() {
         this.collect = {
-            'y' : {
-                max: 0, min: 0, steps: 0, dist: 0
-            },
-            'm' : {
-                max: 0, min: 0, steps: 0, dist: 0
-            },
+            max: 0, min: 0, steps: 0, dist: 0
         };
         this.result = null;
-        this.peakY.start();
-        this.peakM.start();
+        this.counter.start();
         this.started = Date.now();
     }
 
     stop() {
         let dt = Date.now() - this.started;
 
-        this.peakY.stop();
-        this.peakM.stop();
+        this.counter.stop();
 
-        this.collect.y.vectorS = this.peakY.flush();
-        this.collect.m.vectorS = this.peakM.flush();
+        this.collect.vectorS = this.counter.flush();
 
         this.result = {
             collected: this.collect,
@@ -74,7 +61,7 @@ class IMUActivity
         let steps;
         try {
             steps = parseInt(prompt("How much steps?", Math.max(
-                this.collect.y.steps, this.collect.m.steps
+                this.collect.steps
             )));
             let dist  = parseFloat(prompt("Whats distance, in meters?"));
             this.result.suggested.stepDist = Math.abs(dist / steps);
@@ -83,11 +70,8 @@ class IMUActivity
             return;
         }
 
-        this.result.suggested.peakSensibility = {
-            y: this.collect.y.max * .6,
-            m: this.collect.m.avg * 1.1
-        };
-        this.result.suggested.minInterval = dt / steps;
+        this.result.suggested.threshold = this.collect.max * .6;
+        this.result.suggested.minInterval = (dt / steps) * .75;
 
         this.show(this.result);
     }
@@ -113,6 +97,29 @@ class IMUActivity
     show(obj) {
         document.getElementById('txResult').innerHTML = JSON.stringify(obj, null, "  ")
             .replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    setCounter()
+    {
+        if (!confirm(`Your default counter is '${conf.imu.counters.default}'. Change it?`)) {
+            return;
+        }
+        let counter = prompt('Which count do you wanna use?\n\n1-PeakY\n2-Peak3D\n3-Accel');
+        switch (counter) {
+            case '1':
+                conf.imu.counters.default = 'peakY';
+                break;
+            case '2':
+                conf.imu.counters.default = 'peak3d';
+                break;
+            case '3':
+                conf.imu.counters.default = 'accel';
+                break;
+            default:
+                alert('Invalid choice...');
+                return;
+        }
+        saveConfig();
     }
 
     accelOffset()
@@ -167,12 +174,15 @@ class IMUActivity
         document.getElementById('btOffset').addEventListener('click', () => {
             me.accelOffset()
         });
+        document.getElementById('btCounter').addEventListener('click', () => {
+            me.setCounter()
+        });
         this._updateId = setInterval(this._updateView.bind(this), conf.main.updateFreq);
     }
 
     async _updateView()
     {
-        let collecting = this.peakM.active && this.peakY.active;
+        let collecting = this.counter.active;
         let sensor = !!motion.active;
         let hasOffset = !!conf.imu.accelOffset;
         let model = {};
@@ -185,11 +195,12 @@ class IMUActivity
         else {
             model.status = 'IDLE';
         }
-        model.btStart = sensor && !collecting && hasOffset;
-        model.btStop  = collecting;
-        model.btSave  = !collecting && !!this.result;
-        model.btReset = !collecting;
-        model.btShow  = !collecting;
+        model.btStart   = sensor && !collecting && hasOffset;
+        model.btStop    = collecting;
+        model.btSave    = !collecting && !!this.result;
+        model.btReset   = !collecting;
+        model.btShow    = !collecting;
+        model.btCounter = !collecting;
 
         for (var attr in model) {
             let el = document.getElementById(attr);

@@ -142,10 +142,6 @@ class MainActivity
         document.getElementById('btCalibrate').addEventListener('click', () => {
             location.href = 'imu.html';
         });
-        document.getElementById('btDistCounter').addEventListener('click', () => {
-            ImuProvider.distCounter(true);
-            location.reload();
-        });
         document.getElementById('forceImu').value = !!conf.track.forceImu ? '1' : '0';
     }
 
