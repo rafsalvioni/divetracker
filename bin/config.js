@@ -12,6 +12,7 @@ const defaultConf = {
         compassScale: 10, // Scale to use in compass readings
         stepDist: 0.7, // Average distance by step, in meters
         minInterval: 750, // Min interval between steps, in ms
+        accuracy: .94,
         peakSensibility: { // Peak detectors sensibility in...
             y: 3, // ... Y axe
             m: 2 // ... accel vector magnitude
