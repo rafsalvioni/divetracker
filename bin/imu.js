@@ -117,9 +117,9 @@ class IMUActivity
 
     accelOffset()
     {
-        alert('Put your device in a plan surface and don\'t touch it!. Ready?');
+        const TIME = 10000;
+        alert(`Put your device in a plan surface and don\'t touch it by ${TIME / 1000}s!\n\nReady?`);
         
-        const TIME = 5000;
         let count  = 0;
         let offset = {x: 0, y: 0, z: 0};
         let start  = Date.now();
