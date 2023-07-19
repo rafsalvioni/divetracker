@@ -10,19 +10,22 @@ const defaultConf = {
     imu: {
         accelOffset: false, // Accelerator bias
         compassScale: 10, // Scale to use in compass readings
-        stepDist: 0.7, // Average distance by step, in meters
-        accuracy: .94,
+        counter: 'peak3d',
         counters: { // Distance counters settings
-            default: 'peak3d',
             peakY: {
-                threshold: 3 // Minimun peak in Y
+                accuracy: .94, // Counter's accuracy
+                stepDist: 0.7, // Average distance by step, in meters
+                threshold: 3 // Minimum peak in Y
             },
             peak3d: {
-                threshold: 2, // Minimun total
-                minInterval: 750 // Minimun interval between peaks
+                accuracy: .94, // Counter's accuracy
+                stepDist: 0.7, // Average distance by step, in meters
+                threshold: 2, // Minimum total
+                minInterval: 750 // Minimum interval between peaks
             },
             accel: {
-                stopM: 1 // Accel vector max magnitude to consider "no accel"
+                accuracy: .94, // Counter's accuracy
+                threshold: 1 // Threshold to consider a valid movement
             }
         },
     },
@@ -61,6 +64,8 @@ function loadConfig()
         alert('Error reading config... Using the default one');
         localStorage.removeItem(configKey);
     }
+    // Link to selected counter's settings
+    ret.imu.counters.current = ret.imu.counters[ret.imu.counter];
     return ret;
 }
 

@@ -8,71 +8,34 @@ class IMUActivity
     constructor()
     {
         this.counter = loadCounter()
-        this.counter.addEventListener('sample', this.__listener.bind(this));
-        this.counter.addEventListener('step', this.__listener.bind(this));
-    }
-
-    /**
-     * 
-     * @param {Event} e 
-     */
-    __listener(e) {
-        let data = this.collect;
-
-        if (e.type == 'step') {
-            data.steps++;
-            data.dist += Vector.create(e.detail).size;
-            return;
-        }
-
-        if (!data.freq) {
-            data.freq = motion.freq;
-        }
-        else {
-            data.freq = parseInt(data.freq + motion.freq) / 2;
-        }
-
-        data.max = Math.max(data.max, e.detail);
-        data.min = Math.min(data.min, e.detail);
-        data.avg = (data.max + data.min) / 2;
     }
 
     start() {
-        this.collect = {
-            max: 0, min: 0, steps: 0, dist: 0
-        };
         this.result = null;
-        this.counter.start();
-        this.started = Date.now();
+        this.counter.start(true);
     }
 
     stop() {
-        let dt = Date.now() - this.started;
-
         this.counter.stop();
+    }
 
-        this.collect.vectorS = this.counter.flush();
-
+    calibrate() {
         this.result = {
-            collected: this.collect,
-            current:   Object.clone(conf.imu),
-            suggested: Object.clone(conf.imu)
-        }
-        let steps;
-        try {
-            steps = parseInt(prompt("How much steps?", Math.max(
-                this.collect.steps
-            )));
-            let dist  = parseFloat(prompt("Whats distance, in meters?"));
-            this.result.suggested.stepDist = Math.abs(dist / steps);
-        } catch (e) {
-            alert(e);
-            return;
-        }
+            type: 'setting',
+            collected: this.counter.collectorData(),
+            current: Object.clone(conf.imu.counters.current),
+            suggested: this.counter.calcConf()
+        };
+        this.show(this.result);
+    }
 
-        this.result.suggested.threshold = this.collect.max * .6;
-        this.result.suggested.minInterval = (dt / steps) * .75;
-
+    accuracy() {
+        this.result = {
+            type: 'accuracy',
+            collected: this.counter.collectorData(),
+            current: conf.imu.counters.current.accuracy,
+            suggested: this.counter.calcAccuracy()
+        };
         this.show(this.result);
     }
 
@@ -84,10 +47,13 @@ class IMUActivity
         if (!confirm("Are you sure?")) {
             return;
         }
-
-        conf.imu = this.result.suggested;
+        if (this.result.type == 'setting') {
+            conf.imu.counters[conf.imu.counter] = this.result.suggested;
+        }
+        else {
+            conf.imu.counters[conf.imu.counter].accuracy = this.result.suggested;
+        }
         saveConfig();
-        location.reload();
     }
 
     reset() {
@@ -101,19 +67,19 @@ class IMUActivity
 
     setCounter()
     {
-        if (!confirm(`Your default counter is '${conf.imu.counters.default}'. Change it?`)) {
+        if (!confirm(`Your default counter is '${conf.imu.counter}'. Change it?`)) {
             return;
         }
         let counter = prompt('Which count do you wanna use?\n\n1-PeakY\n2-Peak3D\n3-Accel');
         switch (counter) {
             case '1':
-                conf.imu.counters.default = 'peakY';
+                conf.imu.counter = 'peakY';
                 break;
             case '2':
-                conf.imu.counters.default = 'peak3d';
+                conf.imu.counter = 'peak3d';
                 break;
             case '3':
-                conf.imu.counters.default = 'accel';
+                conf.imu.counter = 'accel';
                 break;
             default:
                 alert('Invalid choice...');
@@ -162,8 +128,8 @@ class IMUActivity
         document.getElementById('btStop').addEventListener('click', () => {
             me.stop();
         });
-        document.getElementById('btSave').addEventListener('click', () => {
-            me.save();
+        document.getElementById('btCalib').addEventListener('click', () => {
+            me.calibrate();
         });
         document.getElementById('btReset').addEventListener('click', () => {
             me.reset();
@@ -176,6 +142,12 @@ class IMUActivity
         });
         document.getElementById('btCounter').addEventListener('click', () => {
             me.setCounter()
+        });
+        document.getElementById('btAccur').addEventListener('click', () => {
+            me.accuracy();
+        });
+        document.getElementById('btSave').addEventListener('click', () => {
+            me.save();
         });
         this._updateId = setInterval(this._updateView.bind(this), conf.main.updateFreq);
     }
@@ -197,6 +169,8 @@ class IMUActivity
         }
         model.btStart   = sensor && !collecting && hasOffset;
         model.btStop    = collecting;
+        model.btCalib   = !collecting && !!this.counter.collectorData();
+        model.btAccur   = !collecting && !!this.counter.collectorData();
         model.btSave    = !collecting && !!this.result;
         model.btReset   = !collecting;
         model.btShow    = !collecting;
@@ -222,5 +196,5 @@ try {
     act.run();
 }
 catch (e) {
-    _error(e);
+    alert(e);
 }
