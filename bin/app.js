@@ -5,6 +5,7 @@ import { MotionService as motion, OrientationService as orient } from "../lib/se
 import { DiveMap } from "../lib/map.js";
 import { AppConfig as conf } from "./config.js";
 import '../lib/wake.js';
+import { Dive, configDive, lastDive } from "../lib/dc.js";
 
 const ViewHelper = {
     /**
@@ -35,8 +36,11 @@ const ViewHelper = {
         let h = Math.floor(m / 60);
         s = (new String(s % 60)).padStart(2, '0');
         m = (new String(m % 60)).padStart(2, '0');
-        h = (new String(h)).padStart(2, '0');
-        return `${h}:${m}:${s}`;
+        if (h > 0) {
+            h = (new String(h)).padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+        return `${m}:${s}`;
     },
  
     /**
@@ -70,6 +74,29 @@ const ViewHelper = {
      */
     formatSpeed: (s) => {
         return ViewHelper.formatDistance(s) + '/s';
+    },
+
+    /**
+     * 
+     * @param {Dive} d 
+     * @returns string
+     */
+    formatDeco: (d) => {
+        if (!d || !d.active) {
+            return 'N/A';
+        }
+        let curStop  = d.decoStops.current;
+        let nextStop = d.decoStops.next;
+        let ndt = d.noDecoTime;
+        if (curStop) {
+            return ViewHelper.formatTime(curStop.sec);
+        }
+        else if (nextStop && nextStop.required) {
+            return `S ${nextStop.depth}m`;
+        }
+        else {
+            return `ND ${ndt}`;
+        }
     }
 }
  
@@ -142,6 +169,9 @@ class MainActivity
         document.getElementById('btCalibrate').addEventListener('click', () => {
             location.href = 'imu.html';
         });
+        document.getElementById('btDive').addEventListener('click', () => {
+            configDive();
+        });
         document.getElementById('forceImu').value = !!conf.track.forceImu ? '1' : '0';
     }
 
@@ -176,9 +206,22 @@ class MainActivity
         // Start components
         this.gpx.addPos(curGps.pos, track.id);
         this.map.addPoint(curGps.pos);
+        // Creates a new dive
+        this.dive = new Dive();
+        // Adds dive listeners to show alerts
+        this.dive.addEventListener('alert', (e) => {
+            let alerts = {'mod': 'depth', 'stop': 'deco', 'ascent': 'speed'};
+            if (alerts[e.detail.type]) {
+                document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
+                if (e.detail.active) {
+                    navigator.vibrate(conf.main.updateFreq * .5);
+                }
+            }
+        });
         // Adding track listeners to update components
         var me = this;
         track.addEventListener('change', (e) => {
+            me.dive.setDepthFromAlt(e.target.pos.alt, e.target.first.alt);
             me.gpx.addPos(e.point, e.target.id);
             me.map.setPosition(e.point, me.provider.last.accur);
         });
@@ -193,6 +236,7 @@ class MainActivity
             this.provider.destructor();
             this.provider = fus;
             this.track.updateFrom(null);
+            this.dive.end();
             this.track = null;
             this.map.clean();
             if (this.gpx.hasContents() && window.confirm('Save GPX now?')) {
@@ -228,18 +272,23 @@ class MainActivity
             model.speed = ViewHelper.formatSpeed(this.track.curSpeed);
             model.dist = ViewHelper.formatDistance(this.track.dist);
             model.time = ViewHelper.formatTime(this.track.duration);
+            model.depth = ViewHelper.formatDistance(this.dive.curDepth);
+            model.deco = ViewHelper.formatDeco(this.dive);
         }
         else {
             model.status = 'IDLE';
             model.speed = '0 m/s';
             model.dist = '0 m';
             model.time = ViewHelper.formatTime(0);
+            model.depth = '0 m';
+            model.deco = lastDive.has() ? `SI ${ViewHelper.formatTime(lastDive.si)}` : 'N/A';
         }
         model.btStartTrack = !intrack && !!gps.active;
         model.btGpx = !intrack && this.gpx.hasContents();
         model.btCleanGpx = model.btGpx;
         model.btStopTrack = !!intrack && !!gps.active;
         model.btCalibrate = !intrack;
+        model.btDive      = !intrack;
         model.btDistCounter = !intrack;
 
         for (var attr in model) {

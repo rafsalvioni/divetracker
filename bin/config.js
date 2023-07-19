@@ -35,6 +35,10 @@ const defaultConf = {
         forceImu: false, // Forces use of IMU instead GPS (for land tests...),
         minDist: 5, // Minimum distance to consider stay in a location
     },
+    dc: {
+        o2: .21,
+        maxPpo2: 1.4
+    },
     main: {
         updateFreq: 1000 // Time, in millis, to update view
     }

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DiveTracker</title>
+  <!-- <link rel="manifest" href="manifest.json"> -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="DiveTracker">
+  <meta name="apple-mobile-web-app-title" content="DiveTracker">
+  <meta name="msapplication-starturl" content="/index.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<header>
+</header>
+<main>
+  <div id="chart_div"></div>
+</main>
+<footer>
+</footer>
+<script type="module">
+  import { Dive, DiveCalc } from './lib/dc.js';
+
+  var diveGraph = [];
+  function addData(t, dive) {
+    diveGraph.push([t, -dive.curDepth, -dive.avgDepth, Math.max(dive.noDecoTime,0) / 10]);
+  }
+
+  let dive = new Dive();
+  dive.start();
+  let depth = 0;
+  let t = 0;
+  let dur = (55 * 60) / 5;
+  for (let i = 0; i < dur; i++) {
+    t = i * 5;
+    if (i < 20) {
+      depth += 1 * Math.random();
+    }
+    else {
+      let rnd = parseInt(Math.random() * 6);
+      let diff = [15, 16, 17, 18, 19, 20];
+      depth = diff[rnd];
+    }
+    dive.mockTime = t;
+    dive.depth = depth;
+    addData(t, dive);
+  }
+  let stop;
+  while ((stop = dive.decoStops.next)) {
+    dive.mockTime += 5;
+    depth -= .1;
+    dive.depth = depth;
+    addData(t, dive);
+
+    /*while (stop = dive.decoStops.current) {
+      dive.mockTime += 5;
+      dive.decoStops.mockTime += 5;
+      addData(t, dive);
+    }*/
+  }
+  //dive.depth = 0;
+  //addData(t, dive);
+  //dive.end();
+
+  console.log(dive.decoStops.hasMissed());
+  console.log(dive.decoGroup);
+  
+  google.charts.load('current', {packages: ['corechart', 'line']});
+  google.charts.setOnLoadCallback(drawAxisTickColors);
+
+  function drawAxisTickColors() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('number', 'Time');
+      data.addColumn('number', 'Depth');
+      data.addColumn('number', 'Avg Depth');
+      data.addColumn('number', 'NDL');
+
+      data.addRows(diveGraph);
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+      chart.draw(data, {});
+  }
+</script>
+</body>
+</html>

@@ -7,6 +7,7 @@ const STATIC_CACHE_URLS = [
     root + 'bin/app.js',
     root + 'bin/config.js',
     root + 'bin/imu.js',
+    root + 'lib/dc.js',
     root + 'lib/dist.js',
     root + 'lib/sfilter.js',
     root + 'lib/geo.js',
