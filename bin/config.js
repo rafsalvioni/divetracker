@@ -37,7 +37,8 @@ const defaultConf = {
     },
     dc: {
         o2: .21,
-        maxPpo2: 1.4
+        maxPpo2: 1.4,
+        salt: true
     },
     main: {
         updateFreq: 1000 // Time, in millis, to update view
