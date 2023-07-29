@@ -142,7 +142,7 @@ class MainActivity
         // Update Map bearing when orientation changes
         orient.addEventListener('change', (e) => {
             let bearing = orient.roundAngle(e.detail.compG);
-			me.map.setBearing(bearing);
+			me.map.bearing = bearing;
         });
         // Adds GPX POI when added POI to map
         me.map.addEventListener('poi', (e) => {
