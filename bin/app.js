@@ -205,7 +205,8 @@ class MainActivity
         let track = new Track(curGps.pos);
         // Start components
         this.gpx.addPos(curGps.pos, track.id);
-        this.map.addPoint(curGps.pos);
+        this.map.fromProvider(curGps.pos, curGps.accur);
+        this.map.savePos();
         // Creates a new dive
         this.dive = new Dive();
         // Adds dive listeners to show alerts
@@ -223,7 +224,7 @@ class MainActivity
         track.addEventListener('change', (e) => {
             me.dive.setDepthFromAlt(e.target.pos.alt, e.target.first.alt);
             me.gpx.addPos(e.point, e.target.id);
-            me.map.setPosition(e.point, me.provider.last.accur);
+            me.map.fromProvider(e.point, me.provider.last.accur);
         });
         // Sets position provider to auto update Track
         track.updateFrom(this.provider, conf.track.calcPos);

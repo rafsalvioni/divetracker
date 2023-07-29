@@ -26,13 +26,17 @@
 </footer>
 <script type="module">
   import { DiveMap } from './lib/map.js';
-  import { Point } from './lib/geo.js';
+  import { GeoPoint as Point } from './lib/geo.js';
   var map = new DiveMap(document.getElementById('nav'));
-  map.addPoint(new Point(-23.325, -46.788));
-  map.addPoint(new Point(-23.3255, -46.7885));
-  map.setPosition(new Point(-23.3256, -46.7886));
+  //map.addPoint(new Point(-23.325, -46.788));
+  //map.addPoint(new Point(-23.3255, -46.7885));
+  map.pos = new Point(-23.3256, -46.7886);
+  map.savePos();
+  map.pos = new Point(-23.3246, -46.7876);
+  //map.accur = 10;
+  //map.clean();
   //map.savePos();
-  //map.setBearing(45);
+  map.bearing = 45;
 </script>
 </body>
 </html>
