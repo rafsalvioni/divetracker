@@ -24,7 +24,7 @@
 <footer>
 </footer>
 <script type="module">
-  import { Dive, DiveCalc } from './lib/dc.js';
+  import { Dive } from './lib/dc.js';
 
   var diveGraph = [];
   function addData(t, dive) {
@@ -85,6 +85,18 @@
       var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
       chart.draw(data, {});
   }
+
+  dive = new Dive();
+  dive.depth = 1.2;
+  dive.mockTime = 60;
+  dive.depth = 2;
+  dive.mockTime += 60;
+  dive.depth = .5;
+  dive.mockTime += 5;
+  dive.depth = 0;
+  dive.mockTime += 1800;
+  dive.depth = 0;
+  console.log(dive.ended);
 </script>
 </body>
 </html>

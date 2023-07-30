@@ -81,8 +81,11 @@ const ViewHelper = {
      * @param {Dive} d 
      * @returns string
      */
-    formatDeco: (d) => {
+    decoInfo: (d) => {
         if (!d || !d.active) {
+            if (lastDive.has()) {
+                return `SI ${ViewHelper.formatTime(lastDive.si)}`;
+            }
             return 'N/A';
         }
         let curStop  = d.decoStops.current;
@@ -200,28 +203,38 @@ class MainActivity
         if (document.getElementById('forceImu').value == '1') {
             this.provider = new ImuProvider(curGps.pos, curGps.accur);
         }
+        var me = this;
+        
+        function reCreateDive()
+        {
+            if (me.dive && !me.dive.ended) { // Is there a not ended dive?
+                return;
+            }
+            // No? Lets (re)create
+            me.dive = new Dive();
+            // Adds dive listeners to show alerts
+            me.dive.addEventListener('alert', (e) => {
+                let alerts = {'mod': 'depth', 'stop': 'deco', 'ascent': 'speed'};
+                if (alerts[e.detail.type]) {
+                    document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
+                    if (e.detail.active) {
+                        navigator.vibrate(conf.main.updateFreq * .5);
+                    }
+                }
+            });
+        }
 
         // New Track
         let track = new Track(curGps.pos);
         // Start components
+        reCreateDive();
         this.gpx.addPos(curGps.pos, track.id);
         this.map.fromProvider(curGps.pos, curGps.accur);
         this.map.savePos();
-        // Creates a new dive
-        this.dive = new Dive();
-        // Adds dive listeners to show alerts
-        this.dive.addEventListener('alert', (e) => {
-            let alerts = {'mod': 'depth', 'stop': 'deco', 'ascent': 'speed'};
-            if (alerts[e.detail.type]) {
-                document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
-                if (e.detail.active) {
-                    navigator.vibrate(conf.main.updateFreq * .5);
-                }
-            }
-        });
+
         // Adding track listeners to update components
-        var me = this;
         track.addEventListener('change', (e) => {
+            reCreateDive();
             me.dive.setDepthFromAlt(e.target.pos.alt, e.target.first.alt);
             me.gpx.addPos(e.point, e.target.id);
             me.map.fromProvider(e.point, me.provider.last.accur);
@@ -274,7 +287,6 @@ class MainActivity
             model.dist = ViewHelper.formatDistance(this.track.dist);
             model.time = ViewHelper.formatTime(this.track.duration);
             model.depth = ViewHelper.formatDistance(this.dive.curDepth);
-            model.deco = ViewHelper.formatDeco(this.dive);
         }
         else {
             model.status = 'IDLE';
@@ -282,8 +294,8 @@ class MainActivity
             model.dist = '0 m';
             model.time = ViewHelper.formatTime(0);
             model.depth = '0 m';
-            model.deco = lastDive.has() ? `SI ${ViewHelper.formatTime(lastDive.si)}` : 'N/A';
         }
+        model.deco = ViewHelper.decoInfo(this.dive);
         model.btStartTrack = !intrack && !!gps.active;
         model.btGpx = !intrack && this.gpx.hasContents();
         model.btCleanGpx = model.btGpx;
