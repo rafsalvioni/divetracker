@@ -145,13 +145,13 @@ class MainActivity
         // Update Map bearing when orientation changes
         orient.addEventListener('change', (e) => {
             let bearing = orient.roundAngle(e.detail.compG);
-			me.map.bearing = bearing;
+            me.map.setBearing(bearing); // Using async
         });
         // Adds GPX POI when added POI to map
         me.map.addEventListener('poi', (e) => {
             me.gpx.addWayPoint(e.detail);
         });
-     }
+    }
     
     run() {
         this._updateView();
@@ -225,20 +225,18 @@ class MainActivity
         }
 
         // New Track
-        let track = new Track(curGps.pos);
-        // Start components
-        reCreateDive();
-        this.gpx.addPos(curGps.pos, track.id);
-        this.map.fromProvider(curGps.pos, curGps.accur);
-        this.map.savePos();
-
+        let track   = new Track();
+        var posMode = null;
         // Adding track listeners to update components
         track.addEventListener('change', (e) => {
             reCreateDive();
             me.dive.setDepthFromAlt(e.target.pos.alt, e.target.first.alt);
-            me.gpx.addPos(e.point, e.target.id);
+            me.gpx.addPos(e.point, e.target.id, posMode != me.provider.mode);
             me.map.fromProvider(e.point, me.provider.last.accur);
+            posMode = me.provider.mode;
         });
+        // Define first track pos (here to fire event)
+        track.pos = curGps.pos;
         // Sets position provider to auto update Track
         track.updateFrom(this.provider, conf.track.calcPos);
         this.track = track;
