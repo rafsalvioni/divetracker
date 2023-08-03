@@ -206,7 +206,6 @@ class MainActivity
             alert('Motion sensor is inactive!');
             return;
         }
-        let curGps = gps.last;
         let yesNo  = true;
         if (!auto && !gps.isAccurate()) {
             yesNo = window.confirm('GPS accuracy is very large. Continue?');
@@ -215,6 +214,7 @@ class MainActivity
             return;
         }
         if (document.getElementById('forceImu').value == '1') {
+            let curGps    = gps.last;
             this.provider = new ImuProvider(curGps.pos, curGps.accur);
         }
         var me = this;
@@ -246,8 +246,6 @@ class MainActivity
             me.dive.setDepthFromAlt(e.target.pos.alt, e.target.first.alt);
             me.map.fromProvider(e.point, me.provider.last.accur);
         });
-        // Define first track pos (here to fire event)
-        track.pos = curGps.pos;
         // Sets position provider to auto update Track
         track.updateFrom(this.provider, conf.track.calcPos);
         this.track = track;
