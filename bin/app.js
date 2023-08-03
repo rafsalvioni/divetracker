@@ -143,14 +143,28 @@ class MainActivity
         });
 
         // Update Map bearing when orientation changes
-        orient.addEventListener('change', (e) => {
+        orient.addEventListener('change', async (e) => {
             let bearing = orient.roundAngle(e.detail.compG);
-            me.map.setBearing(bearing); // Using async
+            me.map.bearing = bearing;
         });
         // Adds GPX POI when added POI to map
         me.map.addEventListener('poi', (e) => {
             me.gpx.addWayPoint(e.detail);
         });
+        // Saves data on files
+        var posMode = null;
+        setInterval(async () => {
+            if (me.track) { // Saves current track's position in GPX
+                me.gpx.addPos(me.track.pos, me.track.id, posMode != me.provider.mode);
+                posMode = me.provider.mode;
+            }
+            else {
+                posMode = null;
+            }
+            if (me.dive && me.dive.active) {
+                // Saves dive samples
+            }
+        }, Math.max(conf.track.calcPos, 5000)); // Min interval is 5s
     }
     
     run() {
@@ -225,15 +239,12 @@ class MainActivity
         }
 
         // New Track
-        let track   = new Track();
-        var posMode = null;
-        // Adding track listeners to update components
-        track.addEventListener('change', (e) => {
+        let track = new Track();
+        // Updates dive and map from track
+        track.addEventListener('change', async (e) => {
             reCreateDive();
             me.dive.setDepthFromAlt(e.target.pos.alt, e.target.first.alt);
-            me.gpx.addPos(e.point, e.target.id, posMode != me.provider.mode);
             me.map.fromProvider(e.point, me.provider.last.accur);
-            posMode = me.provider.mode;
         });
         // Define first track pos (here to fire event)
         track.pos = curGps.pos;
