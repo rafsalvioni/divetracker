@@ -5,7 +5,6 @@
 const defaultConf = {
     gps: {
         minAccur: 10, // Minimal accuracy to trust in GPS
-        activeFreq: 10000, // Time, in millis, to consider GPS signal lost
     },
     imu: {
         accelOffset: false, // Accelerator bias
