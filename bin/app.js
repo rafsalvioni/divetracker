@@ -214,8 +214,7 @@ class MainActivity
             return;
         }
         if (document.getElementById('forceImu').value == '1') {
-            let curGps    = gps.last;
-            this.provider = new ImuProvider(curGps.pos, curGps.accur);
+            this.provider = new ImuProvider(gps.last);
         }
         var me = this;
         
@@ -244,7 +243,7 @@ class MainActivity
         track.addEventListener('change', async (e) => {
             reCreateDive();
             me.dive.setDepthFromAlt(e.target.pos.alt, e.target.first.alt);
-            me.map.fromProvider(e.point, me.provider.last.accur);
+            me.map.fromProvider(me.provider.last);
         });
         // Sets position provider to auto update Track
         track.updateFrom(this.provider, conf.track.calcPos);
