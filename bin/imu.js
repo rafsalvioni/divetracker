@@ -48,7 +48,7 @@ class IMUActivity
             return;
         }
         if (this.result.type == 'setting') {
-            conf.imu.counters[conf.imu.counter] = this.result.suggested;
+            Object.assign(conf.imu.counters[conf.imu.counter], this.result.suggested);
         }
         else {
             conf.imu.counters[conf.imu.counter].accuracy = this.result.suggested;
