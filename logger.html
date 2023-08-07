@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DiveTracker</title>
+  <!-- <link rel="manifest" href="manifest.json"> -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="DiveTracker">
+  <meta name="apple-mobile-web-app-title" content="DiveTracker">
+  <meta name="msapplication-starturl" content="/index.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<header>
+</header>
+<main>
+  <textarea id="out" style="width:100%" rows="50"></textarea>
+</main>
+<footer>
+</footer>
+<script type="module">
+import {diveLogger} from './lib/logger.js'
+import {Dive} from './lib/dc.js'
+
+let dive = new Dive();
+// Adds dive listeners to logger
+dive.addEventListener('start', async (e) => {
+    diveLogger.logEvent(e, {lat: -23.12412, lon: -43.1234});
+});
+dive.addEventListener('end', async (e) => {
+    diveLogger.logEvent(e);
+});
+dive.addEventListener('event', async (e) => {
+    diveLogger.logEvent(e);
+});
+dive.addEventListener('sample', async (e) => {
+    diveLogger.logSample(e.target);
+});
+dive.mockTime = 5;
+dive.depth = 2;
+dive.mockTime += 60;
+dive.depth = 18;
+dive.changeMix(.32);
+dive.mockTime += 60*20;
+dive.depth = 18;
+dive.mockTime += 60;
+dive.depth = 0;
+dive.mockTime += 60;
+dive.end();
+
+document.getElementById('out').innerHTML = diveLogger.export();
+</script>
+</body>
+</html>

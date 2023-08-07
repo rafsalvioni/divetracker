@@ -1,11 +1,11 @@
 import { GpsProvider as gps, FusionProvider as fus, ImuProvider } from "../lib/position.js";
 import { GeoPoint, Track } from "../lib/geo.js";
-import { GpxWriter } from "../lib/gpx.js";
 import { MotionService as motion, OrientationService as orient } from "../lib/sensor.js";
 import { DiveMap } from "../lib/map.js";
 import { AppConfig as conf } from "./config.js";
 import '../lib/wake.js';
 import { Dive, configDive, lastDive } from "../lib/dc.js";
+import { cleanLogs, diveLogger, downloadLogs, hasLogs, trackLogger } from "../lib/logger.js";
 
 const ViewHelper = {
     /**
@@ -124,8 +124,6 @@ class MainActivity
 
         // Loads the map
         this.map = new DiveMap(document.getElementById('nav'));
-        // Starts GPX writer
-        this.gpx = new GpxWriter();
 
         // Add listener for auto start
         gps.addEventListener('active', async (e) => {
@@ -149,22 +147,17 @@ class MainActivity
         });
         // Adds GPX POI when added POI to map
         me.map.addEventListener('poi', (e) => {
-            me.gpx.addWayPoint(e.detail);
+            trackLogger.logPoi(e.detail);
         });
         // Saves data on files
-        var posMode = null;
         setInterval(async () => {
             if (me.track) { // Saves current track's position in GPX
-                me.gpx.addPos(me.track.pos, me.track.id, posMode != me.provider.mode);
-                posMode = me.provider.mode;
-            }
-            else {
-                posMode = null;
+                trackLogger.logPos(me.track);
             }
             if (me.dive && me.dive.active) {
-                // Saves dive samples
+                diveLogger.logSample(me.dive);
             }
-        }, Math.max(conf.track.calcPos, 5000)); // Min interval is 5s
+        }, Math.max(conf.track.calcPos, 10000)); // Min interval is 10s
     }
     
     run() {
@@ -177,11 +170,11 @@ class MainActivity
         document.getElementById('btStopTrack').addEventListener('click', () => {
             app.stopTrack();
         });
-        document.getElementById('btGpx').addEventListener('click', () => {
-            app.getGpx();
+        document.getElementById('btLogs').addEventListener('click', () => {
+            downloadLogs();
         });
-        document.getElementById('btCleanGpx').addEventListener('click', () => {
-            app.cleanGpx();
+        document.getElementById('btCleanLogs').addEventListener('click', () => {
+            cleanLogs();
         });
         document.getElementById('btCalibrate').addEventListener('click', () => {
             location.href = 'imu.html';
@@ -225,6 +218,16 @@ class MainActivity
             }
             // No? Lets (re)create
             me.dive = new Dive();
+            // Adds dive listeners to logger
+            me.dive.addEventListener('start', async (e) => {
+                diveLogger.logEvent(e, me.provider.last.pos);
+            });
+            me.dive.addEventListener('end', async (e) => {
+                diveLogger.logEvent(e);
+            });
+            me.dive.addEventListener('event', async (e) => {
+                diveLogger.logEvent(e);
+            });
             // Adds dive listeners to show alerts
             me.dive.addEventListener('alert', (e) => {
                 let alerts = {'mod': 'depth', 'stop': 'deco', 'ascent': 'speed'};
@@ -259,25 +262,9 @@ class MainActivity
             this.dive.end();
             this.track = null;
             this.map.clean();
-            if (this.gpx.hasContents() && window.confirm('Save GPX now?')) {
-                this.getGpx();
-            }
         }
     }
 
-    getGpx()
-    {
-        let name = parseInt(Date.now() / 60000);
-        download(this.gpx.end(), 'application/octet-stream', 'dives-{0}.gpx'.format(name));
-    }
-
-    cleanGpx()
-    {
-        if (this.gpx.hasContents() && window.confirm("TRACK DATA WILL BE LOST!\n\nAre you sure?")) {
-            this.gpx.create();
-        }
-    }
-    
     async _updateView()
     {
         let last = this.provider.last;
@@ -303,8 +290,8 @@ class MainActivity
         }
         model.deco = ViewHelper.decoInfo(this.dive);
         model.btStartTrack = !intrack && !!gps.active;
-        model.btGpx = !intrack && this.gpx.hasContents();
-        model.btCleanGpx = model.btGpx;
+        model.btLogs = !intrack && hasLogs();
+        model.btCleanLogs = model.btLogs;
         model.btStopTrack = !!intrack && !!gps.active;
         model.btCalibrate = !intrack;
         model.btDive      = !intrack;
@@ -323,16 +310,6 @@ class MainActivity
             }
         }
     }
-}
-
-function download(data, type, name) {
-    let blob = new Blob([data], {type});
-    let url  = window.URL.createObjectURL(blob);
-    let link = document.createElement("a");
-    link.download = name;
-    link.href = url;
-    link.click();
-    window.URL.revokeObjectURL(url);
 }
 
 function toogleDisplay(el, show=true) {

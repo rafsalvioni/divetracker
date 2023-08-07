@@ -12,7 +12,7 @@ const STATIC_CACHE_URLS = [
     root + 'lib/sfilter.js',
     root + 'lib/geo.js',
     root + 'lib/trigo.js',
-    root + 'lib/gpx.js',
+    root + 'lib/logger.js',
     root + 'lib/magvar.js',
     root + 'lib/map.js',
     root + 'lib/position.js',
