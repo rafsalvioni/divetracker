@@ -24,23 +24,16 @@
 <footer>
 </footer>
 <script type="module">
+const fus = {
+    pos: {
+        last: {lat: -23.324653, lon: -43.2345}
+    }
+};
+
 import {diveLogger} from './lib/logger.js'
 import {Dive} from './lib/dc.js'
 
 let dive = new Dive();
-// Adds dive listeners to logger
-dive.addEventListener('start', async (e) => {
-    diveLogger.logEvent(e, {lat: -23.12412, lon: -43.1234});
-});
-dive.addEventListener('end', async (e) => {
-    diveLogger.logEvent(e);
-});
-dive.addEventListener('event', async (e) => {
-    diveLogger.logEvent(e);
-});
-dive.addEventListener('sample', async (e) => {
-    diveLogger.logSample(e.target);
-});
 dive.mockTime = 5;
 dive.depth = 2;
 dive.mockTime += 60;

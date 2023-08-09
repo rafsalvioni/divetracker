@@ -94,7 +94,7 @@ const ViewHelper = {
         if (curStop) {
             return ViewHelper.formatTime(curStop.sec);
         }
-        else if (nextStop && nextStop.required) {
+        else if (d.ascent && nextStop && nextStop.required) {
             return `S ${nextStop.depth}m`;
         }
         else {
@@ -211,7 +211,7 @@ class MainActivity
             me.dive = new Dive();
             // Adds dive listeners to show alerts
             me.dive.addEventListener('alert', (e) => {
-                let alerts = {'mod': 'depth', 'stop': 'deco', 'ascent': 'speed'};
+                let alerts = {'mod': 'depth', 'ndt': 'deco', 'stop': 'deco', 'ascent': 'speed'};
                 if (alerts[e.detail.type]) {
                     document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
                     if (e.detail.active) {
