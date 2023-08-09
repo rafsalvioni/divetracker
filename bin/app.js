@@ -5,7 +5,7 @@ import { DiveMap } from "../lib/map.js";
 import { AppConfig as conf } from "./config.js";
 import '../lib/wake.js';
 import { Dive, configDive, lastDive } from "../lib/dc.js";
-import { cleanLogs, diveLogger, downloadLogs, hasLogs, trackLogger } from "../lib/logger.js";
+import { cleanLogs, downloadLogs, hasLogs, trackLogger } from "../lib/logger.js";
 
 const ViewHelper = {
     /**
@@ -145,19 +145,10 @@ class MainActivity
             let bearing = orient.roundAngle(e.detail.compG);
             me.map.bearing = bearing;
         });
-        // Adds GPX POI when added POI to map
+        // Logs POI in TrackLogger when added POI to map
         me.map.addEventListener('poi', (e) => {
             trackLogger.logPoi(e.detail);
         });
-        // Saves data on files
-        setInterval(async () => {
-            if (me.track) { // Saves current track's position in GPX
-                trackLogger.logPos(me.track);
-            }
-            if (me.dive && me.dive.active) {
-                diveLogger.logSample(me.dive);
-            }
-        }, Math.max(conf.track.calcPos, 10000)); // Min interval is 10s
     }
     
     run() {
@@ -218,16 +209,6 @@ class MainActivity
             }
             // No? Lets (re)create
             me.dive = new Dive();
-            // Adds dive listeners to logger
-            me.dive.addEventListener('start', async (e) => {
-                diveLogger.logEvent(e, me.provider.last.pos);
-            });
-            me.dive.addEventListener('end', async (e) => {
-                diveLogger.logEvent(e);
-            });
-            me.dive.addEventListener('event', async (e) => {
-                diveLogger.logEvent(e);
-            });
             // Adds dive listeners to show alerts
             me.dive.addEventListener('alert', (e) => {
                 let alerts = {'mod': 'depth', 'stop': 'deco', 'ascent': 'speed'};
