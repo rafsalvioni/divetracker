@@ -4,7 +4,7 @@ import { MotionService as motion, OrientationService as orient } from "../lib/se
 import { DiveMap } from "../lib/map.js";
 import { AppConfig as conf } from "./config.js";
 import '../lib/wake.js';
-import { Dive, configDive, lastDive } from "../lib/dc.js";
+import { Dive, configDive, decoState } from "../lib/dc.js";
 import { cleanLogs, downloadLogs, hasLogs, trackLogger } from "../lib/logger.js";
 
 const ViewHelper = {
@@ -83,8 +83,8 @@ const ViewHelper = {
      */
     decoInfo: (d) => {
         if (!d || !d.active) {
-            if (lastDive.has()) {
-                return `SI ${ViewHelper.formatTime(lastDive.si)}`;
+            if (decoState.has()) {
+                return `SI ${ViewHelper.formatTime(decoState.si)}`;
             }
             return 'N/A';
         }

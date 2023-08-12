@@ -34,42 +34,44 @@ import {diveLogger, trackLogger} from './lib/logger.js'
 import {Dive} from './lib/dc.js'
 import {GeoPoint, Track} from './lib/geo.js'
 
-let dive = new Dive();
-dive.mockTime = 5;
-dive.depth = 2;
-diveLogger.logSample(dive);
-dive.mockTime += 60;
-dive.depth = 18;
-diveLogger.logSample(dive);
-dive.changeMix(.32);
-dive.mockTime += 60*20;
-dive.depth = 18;
-diveLogger.logSample(dive);
-dive.mockTime += 60;
-dive.depth = 0;
-diveLogger.logSample(dive);
-dive.mockTime += 60;
-diveLogger.logSample(dive);
-dive.end();
+setTimeout(() => {
+  let dive = new Dive();
+  dive.mockTime = 5;
+  dive.depth = 2;
+  diveLogger.logSample(dive);
+  dive.mockTime += 60;
+  dive.depth = 18;
+  diveLogger.logSample(dive);
+  dive.changeMix(.32);
+  dive.mockTime += 60*20;
+  dive.depth = 18;
+  diveLogger.logSample(dive);
+  dive.mockTime += 60;
+  dive.depth = 0;
+  diveLogger.logSample(dive);
+  dive.mockTime += 60;
+  diveLogger.logSample(dive);
+  dive.end();
 
-document.getElementById('out').innerHTML = diveLogger.export();
+  document.getElementById('out').innerHTML = diveLogger.export();
 
-let track = new Track();
-track.pos = new GeoPoint(-23.23555, -46.3245);
-trackLogger.logPos(track);
-track.pos = new GeoPoint(-23.23565, -46.3255);
-trackLogger.logPos(track);
-track.pos = new GeoPoint(-23.23575, -46.3265);
-trackLogger.logPos(track);
-track.pos = new GeoPoint(-23.23585, -46.3275);
-trackLogger.logPos(track);
-track.pos = new GeoPoint(-23.23595, -46.3285);
-trackLogger.logPos(track);
-track.pos = new GeoPoint(-23.23505, -46.3295);
-trackLogger.logPos(track);
-track.pos = new GeoPoint(-23.23515, -46.3205);
+  let track = new Track();
+  track.pos = new GeoPoint(-23.23555, -46.3245);
+  trackLogger.logPos(track);
+  track.pos = new GeoPoint(-23.23565, -46.3255);
+  trackLogger.logPos(track);
+  track.pos = new GeoPoint(-23.23575, -46.3265);
+  trackLogger.logPos(track);
+  track.pos = new GeoPoint(-23.23585, -46.3275);
+  trackLogger.logPos(track);
+  track.pos = new GeoPoint(-23.23595, -46.3285);
+  trackLogger.logPos(track);
+  track.pos = new GeoPoint(-23.23505, -46.3295);
+  trackLogger.logPos(track);
+  track.pos = new GeoPoint(-23.23515, -46.3205);
 
-document.getElementById('out').innerHTML += trackLogger.export();
+  document.getElementById('out').innerHTML += trackLogger.export();
+}, 1000);
 </script>
 </body>
 </html>
