@@ -8,7 +8,10 @@ const defaultConf = {
     },
     imu: {
         accelOffset: false, // Accelerator bias
-        compassScale: 10, // Scale to use in compass readings
+        compass: {
+            scale: 10, // Scale to use in compass readings
+            offset: 0 // Offset to use on interference places (like a metal box)
+        },
         counter: 'peak3d',
         counters: { // Distance counters settings
             peakY: {

@@ -1,6 +1,5 @@
 import { loadCounter } from "../lib/dist.js";
 import { MotionService as motion } from "../lib/sensor.js";
-import { Vector } from "../lib/trigo.js";
 import { AppConfig as conf, restoreConfig, saveConfig } from "./config.js";
 
 class IMUActivity
@@ -119,6 +118,18 @@ class IMUActivity
         window.addEventListener('devicemotion', c, true);
     }
 
+    compassOffset() {
+        let offset = conf.imu.compass.offset;
+        offset = prompt('Input compass offset, in degrees:', offset);
+        if (offset !== null && !isNaN(offset)) {
+            conf.imu.compass.offset = parseFloat(offset);
+            saveConfig();
+        }
+        else {
+            alert('Invalid offset...');
+        }
+    }
+
     run() {
         this._updateView();
         var me = this;
@@ -137,8 +148,11 @@ class IMUActivity
         document.getElementById('btShow').addEventListener('click', () => {
             me.show(conf.imu);
         });
-        document.getElementById('btOffset').addEventListener('click', () => {
+        document.getElementById('btAccelOffset').addEventListener('click', () => {
             me.accelOffset()
+        });
+        document.getElementById('btCompassOffset').addEventListener('click', () => {
+            me.compassOffset()
         });
         document.getElementById('btCounter').addEventListener('click', () => {
             me.setCounter()
