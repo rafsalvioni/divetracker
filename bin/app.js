@@ -5,7 +5,7 @@ import { DiveMap } from "../lib/map.js";
 import { AppConfig as conf } from "./config.js";
 import '../lib/wake.js';
 import { Dive, configDive, decoState } from "../lib/dc.js";
-import { cleanLogs, downloadLogs, hasLogs, trackLogger } from "../lib/logger.js";
+import { cleanLogs, downloadLogs, hasLogs, trackLogger, diveLogger } from "../lib/logger.js";
 
 const ViewHelper = {
     /**
@@ -209,6 +209,8 @@ class MainActivity
             }
             // No? Lets (re)create
             me.dive = new Dive();
+            // Add dive to logger
+            diveLogger.dive = me.dive;
             // Adds dive listeners to show alerts
             me.dive.addEventListener('alert', (e) => {
                 let alerts = {'mod': 'depth', 'ndt': 'deco', 'stop': 'deco', 'ascent': 'speed'};
@@ -231,6 +233,8 @@ class MainActivity
         });
         // Sets position provider to auto update Track
         track.updateFrom(this.provider, conf.track.calcPos);
+        // When there is a provider, add to logger
+        trackLogger.track = track;
         this.track = track;
     }
 
@@ -240,8 +244,10 @@ class MainActivity
             this.provider.destructor();
             this.provider = fus;
             this.track.updateFrom(null);
-            this.dive.end();
             this.track = null;
+            trackLogger.track = null;
+            this.dive.end();
+            diveLogger.dive = null;
             this.map.clean();
         }
     }
