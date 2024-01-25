@@ -45,11 +45,11 @@
     dive.depth = dives[0].samples[i][1] / 1000;
     addData(dive.durSec, dive);
   }
-  console.log(`Deco Group: ${dive.decoGroup == 'N'}`);
+  console.log(`Deco Group: ${dive.decoState.group == 'N'}`);
   console.log(`Max Depth: ${parseInt(dive.maxDepth) == 30}`);
   console.log(`AVG Depth: ${parseInt(dive.avgDepth) == 18}`);
   dive.end();
-  console.log(diveLogger.export());
+  //console.log(diveLogger.export());
   
   google.charts.load('current', {packages: ['corechart', 'line']});
   google.charts.setOnLoadCallback(drawAxisTickColors);
