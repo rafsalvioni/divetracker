@@ -29,7 +29,7 @@
 
   var diveGraph = [];
   function addData(t, dive) {
-    diveGraph.push([t, -dive.curDepth, -dive.avgDepth, dive.noDecoTime / 10]);
+    diveGraph.push([t, -dive.curDepth, -dive.avgDepth, dive.decoState.ndt / 10]);
   }
 
   var dives = [
