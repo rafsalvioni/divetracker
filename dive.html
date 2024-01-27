@@ -29,7 +29,7 @@
 
   var diveGraph = [];
   function addData(t, dive) {
-    diveGraph.push([t, -dive.curDepth, -dive.avgDepth, dive.decoState.ndt / 10]);
+    diveGraph.push([t, -dive.depth, -dive.avgDepth, dive.decoState.ndt / 10]);
   }
 
   var dives = [
@@ -40,16 +40,20 @@
   dive.mockTime = 0;
   diveLogger.dive = dive;
   dive.start(.33);
+  let deco = false;
   for (let i = 0; i < dives[0].samples.length; i++) {
     dive.mockTime = dives[0].samples[i][0];
     dive.depth = dives[0].samples[i][1] / 1000;
     addData(dive.durSec, dive);
+    if (!deco && dive.mockTime >= 1780) {
+      //dive.changeMix(.5); deco = true;
+    }
   }
   console.log(`Deco Group: ${dive.decoState.group == 'N'}`);
   console.log(`Max Depth: ${parseInt(dive.maxDepth) == 30}`);
   console.log(`AVG Depth: ${parseInt(dive.avgDepth) == 18}`);
   dive.end();
-  //console.log(diveLogger.export());
+  diveLogger.export();
   
   google.charts.load('current', {packages: ['corechart', 'line']});
   google.charts.setOnLoadCallback(drawAxisTickColors);

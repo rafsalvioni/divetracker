@@ -266,7 +266,7 @@ class MainActivity
             model.speed = ViewHelper.formatSpeed(this.track.curSpeed);
             model.dist = ViewHelper.formatDistance(this.track.dist);
             model.time = ViewHelper.formatTime(this.track.duration);
-            model.depth = ViewHelper.formatDistance(this.dive.curDepth);
+            model.depth = ViewHelper.formatDistance(this.dive.depth);
         }
         else {
             model.status = 'IDLE';
