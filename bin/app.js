@@ -4,7 +4,7 @@ import { MotionService as motion, OrientationService as orient } from "../lib/se
 import { DiveMap } from "../lib/map.js";
 import { AppConfig as conf } from "./config.js";
 import '../lib/wake.js';
-import { Dive, configDive, desatState } from "../lib/dc.js";
+import { dc, configDive } from "../lib/dc.js";
 import { cleanLogs, downloadLogs, hasLogs, trackLogger, diveLogger } from "../lib/logger.js";
 
 const ViewHelper = {
@@ -83,10 +83,8 @@ const ViewHelper = {
      */
     decoInfo: (d) => {
         if (!d || !d.active) {
-            if (desatState.has()) {
-                return `SI ${ViewHelper.formatTime(desatState.si)}`;
-            }
-            return 'N/A';
+            let si = dc.desatState.si;
+            return isFinite(si) ? `SI ${ViewHelper.formatTime(si)}` : 'N/A';
         }
         let curStop  = d.decoStops.current;
         let nextStop = d.decoStops.next;
@@ -149,6 +147,22 @@ class MainActivity
         me.map.addEventListener('poi', (e) => {
             trackLogger.logPoi(e.detail);
         });
+        // Listener when a dive is created
+        dc.addEventListener('dive', (d) => {
+            let dive = d.detail;
+            // Add dive to logger
+            diveLogger.dive = dive;
+            // Adds dive listeners to show alerts
+            dive.addEventListener('alert', (e) => {
+                let alerts = {'mod': 'depth', 'ndt': 'deco', 'stop': 'deco', 'ascent': 'speed', 'descent': 'speed'};
+                if (alerts[e.detail.type]) {
+                    document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
+                    if (e.detail.active) {
+                        navigator.vibrate(conf.main.updateFreq * .5);
+                    }
+                }
+            });
+        });
     }
     
     run() {
@@ -202,33 +216,11 @@ class MainActivity
         }
         var me = this;
         
-        function reCreateDive()
-        {
-            if (me.dive && !me.dive.ended) { // Is there a not ended dive?
-                return;
-            }
-            // No? Lets (re)create
-            me.dive = new Dive();
-            // Add dive to logger
-            diveLogger.dive = me.dive;
-            // Adds dive listeners to show alerts
-            me.dive.addEventListener('alert', (e) => {
-                let alerts = {'mod': 'depth', 'ndt': 'deco', 'stop': 'deco', 'ascent': 'speed'};
-                if (alerts[e.detail.type]) {
-                    document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
-                    if (e.detail.active) {
-                        navigator.vibrate(conf.main.updateFreq * .5);
-                    }
-                }
-            });
-        }
-
         // New Track
         let track = new Track();
-        // Updates dive and map from track
+        // Updates DC and map from track
         track.addEventListener('change', async (e) => {
-            reCreateDive();
-            me.dive.setDepthFromAlt(e.target.pos.alt, e.target.first.alt);
+            dc.setDepthFromAlt(e.target.pos.alt, e.target.first.alt);
             me.map.fromProvider(me.provider.last);
         });
         // Sets position provider to auto update Track
@@ -246,8 +238,10 @@ class MainActivity
             this.track.updateFrom(null);
             this.track = null;
             trackLogger.track = null;
-            this.dive.end();
-            diveLogger.dive = null;
+            if (dc.inDive) {
+                dc.dive.end();
+                diveLogger.dive = null;
+            }
             this.map.clean();
         }
     }
@@ -266,16 +260,16 @@ class MainActivity
             model.speed = ViewHelper.formatSpeed(this.track.curSpeed);
             model.dist = ViewHelper.formatDistance(this.track.dist);
             model.time = ViewHelper.formatTime(this.track.duration);
-            model.depth = ViewHelper.formatDistance(this.dive.depth);
+            model.depth = ViewHelper.formatDistance(dc.depth);
         }
         else {
             model.status = 'IDLE';
             model.speed = '0 m/s';
             model.dist = '0 m';
             model.time = ViewHelper.formatTime(0);
-            model.depth = '0 m';
+            model.depth = 'N/D';
         }
-        model.deco = ViewHelper.decoInfo(this.dive);
+        model.deco = ViewHelper.decoInfo(dc.dive);
         model.btStartTrack = !intrack && !!gps.active;
         model.btLogs = !intrack && hasLogs();
         model.btCleanLogs = model.btLogs;
