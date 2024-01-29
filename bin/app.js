@@ -187,6 +187,9 @@ class MainActivity
         document.getElementById('btDive').addEventListener('click', () => {
             configDive();
         });
+        document.getElementById('btPlan').addEventListener('click', () => {
+            app.planDive();
+        });
         document.getElementById('forceImu').value = !!conf.track.forceImu ? '1' : '0';
     }
 
@@ -246,6 +249,17 @@ class MainActivity
         }
     }
 
+    planDive()
+    {
+        let str = `RNG: ${dc.desatState.rng}, Water: ${conf.dc.salt ? 'Salt' : 'Fresh'}\n`;
+        str += `O2: ${conf.dc.o2 * 100}%, ppO2: ${conf.dc.maxPpo2}\n\n`;
+        let i   = 1;
+        for (let d of dc.plan()) {
+            str += `${i++}- Max depth: ${d.d} m, NDL: ${d.t} min\n`;
+        }
+        alert(str);
+    }
+
     async _updateView()
     {
         let last = this.provider.last;
@@ -277,6 +291,7 @@ class MainActivity
         model.btCalibrate = !intrack;
         model.btDive      = !intrack;
         model.btDistCounter = !intrack;
+        model.btPlan = !intrack;
 
         for (var attr in model) {
             let el = document.getElementById(attr);
