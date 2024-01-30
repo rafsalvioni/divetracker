@@ -38,7 +38,7 @@ const defaultConf = {
         minDist: 5, // Minimum distance to consider stay in a location
     },
     dc: {
-        mixes: [{o2: .21}],
+        mixes: [], // No mix? Defaults AIR
         maxPpo2: 1.4,
         salt: true
     },

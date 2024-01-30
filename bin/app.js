@@ -144,7 +144,7 @@ class MainActivity
             me.map.bearing = bearing;
         });
         // Logs POI in TrackLogger when added POI to map
-        me.map.addEventListener('poi', (e) => {
+        me.map.addEventListener('poi', async (e) => {
             trackLogger.logPoi(e.detail);
         });
         // Listener when a dive is created
@@ -153,7 +153,7 @@ class MainActivity
             // Add dive to logger
             diveLogger.dive = dive;
             // Adds dive listeners to show alerts
-            dive.addEventListener('alert', (e) => {
+            dive.addEventListener('alert', async (e) => {
                 let alerts = {'mod': 'depth', 'ndt': 'deco', 'stop': 'deco', 'ascent': 'speed'};
                 if (alerts[e.detail.type]) {
                     document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
@@ -301,18 +301,29 @@ class MainActivity
         model.btDive      = !intrack;
         model.btDistCounter = !intrack;
         model.btPlan = !intrack;
-        model.btTank = dc.inDive && (dc.dive.nextMix() instanceof GasMix);
+        model.btTank = false;
+
+        if (dc.inDive) {
+            let mix = dc.dive.nextMix();
+            if (mix) {
+                model.btTank = `NT: ${mix.id}`;
+                document.getElementById('btTank').disabled = !mix.allowed;
+            }
+        }
 
         for (var attr in model) {
             let el = document.getElementById(attr);
             if (!el) {
                 continue;
             }
-            else if (typeof(model[attr]) == 'boolean') {
-                el.style.display = model[attr] ? '' : 'none';
+            else if (!model[attr]) {
+                el.style.display = 'none';
             }
             else {
-                el.innerHTML = model[attr];
+                el.style.display = '';
+                if (typeof(model[attr]) != 'boolean') {
+                    el.innerHTML = model[attr];
+                }
             }
         }
     }
