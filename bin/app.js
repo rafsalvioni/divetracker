@@ -4,7 +4,7 @@ import { MotionService as motion, OrientationService as orient } from "../lib/se
 import { DiveMap } from "../lib/map.js";
 import { AppConfig as conf } from "./config.js";
 import '../lib/wake.js';
-import { dc, configDive } from "../lib/dc.js";
+import { dc, configDive, STARTGAS, GasMix } from "../lib/dc.js";
 import { cleanLogs, downloadLogs, hasLogs, trackLogger, diveLogger } from "../lib/logger.js";
 
 const ViewHelper = {
@@ -190,6 +190,15 @@ class MainActivity
         document.getElementById('btPlan').addEventListener('click', () => {
             app.planDive();
         });
+        document.getElementById('btTank').addEventListener('click', (e) => {
+            if (dc.inDive) {
+                let mix = dc.dive.nextMix();
+                if (mix instanceof GasMix) {
+                    dc.dive.changeMix(mix);
+                    e.target.style.display = 'none';
+                }
+            }
+        });
         document.getElementById('forceImu').value = !!conf.track.forceImu ? '1' : '0';
     }
 
@@ -251,11 +260,11 @@ class MainActivity
 
     planDive()
     {
-        let str = `RNG: ${dc.desatState.rng}, Water: ${conf.dc.salt ? 'Salt' : 'Fresh'}\n`;
-        str += `O2: ${conf.dc.o2 * 100}%, ppO2: ${conf.dc.maxPpo2}\n\n`;
+        let str = `RNG: ${dc.desatState.rng ?? 'N/D'}, Water: ${conf.dc.salt ? 'Salt' : 'Fresh'}\n`;
+        str += `Gas: ${STARTGAS.id}\n\n`;
         let i   = 1;
-        for (let d of dc.plan()) {
-            str += `${i++}- Max depth: ${d.d} m, NDL: ${d.t} min\n`;
+        for (let p of dc.plan()) {
+            str += `${i++}- Max depth: ${p[1]} m, NDL: ${p[0]} min\n`;
         }
         alert(str);
     }
@@ -292,6 +301,7 @@ class MainActivity
         model.btDive      = !intrack;
         model.btDistCounter = !intrack;
         model.btPlan = !intrack;
+        model.btTank = dc.inDive && (dc.dive.nextMix() instanceof GasMix);
 
         for (var attr in model) {
             let el = document.getElementById(attr);
