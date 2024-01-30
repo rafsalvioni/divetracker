@@ -154,12 +154,12 @@ class MainActivity
             diveLogger.dive = dive;
             // Adds dive listeners to show alerts
             dive.addEventListener('alert', (e) => {
-                let alerts = {'mod': 'depth', 'ndt': 'deco', 'stop': 'deco', 'ascent': 'speed', 'descent': 'speed'};
+                let alerts = {'mod': 'depth', 'ndt': 'deco', 'stop': 'deco', 'ascent': 'speed'};
                 if (alerts[e.detail.type]) {
                     document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
-                    if (e.detail.active) {
-                        navigator.vibrate(conf.main.updateFreq * .5);
-                    }
+                }
+                if (e.detail.active) {
+                    navigator.vibrate(conf.main.updateFreq * .5);
                 }
             });
         });
