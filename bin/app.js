@@ -260,11 +260,12 @@ class MainActivity
 
     planDive()
     {
-        let str = `RNG: ${dc.desatState.rng ?? 'N/D'}, Water: ${conf.dc.salt ? 'Salt' : 'Fresh'}\n`;
-        str += `Gas: ${STARTGAS.id}\n\n`;
+        let plan = dc.plan();
+        let str = `RNG: ${plan.rg ?? '-'}, Water: ${plan.water}\n`;
+        str += `Gas: ${plan.mix}, MOD: ${plan.mod}, pO2: ${plan.pO2}\n\n`;
         let i   = 1;
-        for (let p of dc.plan()) {
-            str += `${i++}- Max depth: ${p[1]} m, NDL: ${p[0]} min\n`;
+        for (let p of plan.dives) {
+            str += `${i++}- Depth: ${p.depth} m, NDL: ${p.ndl} min, EAD: ${p.ead}, RNT: ${p.rnt}\n`;
         }
         alert(str);
     }
