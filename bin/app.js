@@ -193,7 +193,7 @@ class MainActivity
         document.getElementById('btTank').addEventListener('click', (e) => {
             if (dc.inDive) {
                 let mix = dc.dive.nextMix();
-                if (mix instanceof GasMix) {
+                if (mix && mix.canUseIn(dc.dive)) {
                     dc.dive.changeMix(mix);
                     e.target.style.display = 'none';
                 }
@@ -308,7 +308,7 @@ class MainActivity
             let mix = dc.dive.nextMix();
             if (mix) {
                 model.btTank = `NT: ${mix.id}`;
-                document.getElementById('btTank').disabled = !mix.allowed;
+                document.getElementById('btTank').disabled = !mix.canUseIn(dc.dive);
             }
         }
 
