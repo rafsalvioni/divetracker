@@ -232,7 +232,7 @@ class MainActivity
         let track = new Track();
         // Updates DC and map from track
         track.addEventListener('change', async (e) => {
-            dc.setDepthFromAlt(e.target.pos.alt, e.target.first.alt);
+            dc.update(e.target);
             me.map.fromProvider(me.provider.last);
         });
         // Sets position provider to auto update Track
