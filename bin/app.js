@@ -149,7 +149,7 @@ class MainActivity
         });
         // Listener when a dive is created
         dc.addEventListener('dive', (d) => {
-            let dive = d.detail;
+            let dive = d.target.dive;
             // Add dive to logger
             diveLogger.dive = dive;
             // Adds dive listeners to show alerts
@@ -248,6 +248,7 @@ class MainActivity
             this.provider.destructor();
             this.provider = fus;
             this.track.updateFrom(null);
+            dc.update(this.track);
             this.track = null;
             trackLogger.track = null;
             if (dc.inDive) {
@@ -261,7 +262,7 @@ class MainActivity
     planDive()
     {
         let plan = dc.plan();
-        let str = `RNG: ${plan.rg ?? '-'}, Water: ${plan.water}\n`;
+        let str = `RNG: ${plan.rg ?? '-'}, Water: ${plan.water}, SP: ${plan.sp.round(2)} bar\n`;
         str += `Gas: ${plan.mix}, MOD: ${plan.mod}, pO2: ${plan.pO2}\n\n`;
         let i   = 1;
         for (let p of plan.dives) {
@@ -301,7 +302,7 @@ class MainActivity
         model.btCalibrate = !intrack;
         model.btDive      = !intrack;
         model.btDistCounter = !intrack;
-        model.btPlan = !intrack;
+        model.btPlan = model.btStartTrack;
         model.btTank = false;
 
         if (dc.inDive) {
