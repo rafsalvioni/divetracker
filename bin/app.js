@@ -4,7 +4,7 @@ import { MotionService as motion, OrientationService as orient } from "../lib/se
 import { DiveMap } from "../lib/map.js";
 import { AppConfig as conf } from "./config.js";
 import '../lib/wake.js';
-import { dc, configDive, STARTGAS, GasMix } from "../lib/dc.js";
+import { dc, configDive } from "../lib/dc.js";
 import { cleanLogs, downloadLogs, hasLogs, trackLogger, diveLogger } from "../lib/logger.js";
 
 const ViewHelper = {
