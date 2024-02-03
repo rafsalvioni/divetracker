@@ -163,7 +163,7 @@ class IMUActivity
         document.getElementById('btSave').addEventListener('click', () => {
             me.save();
         });
-        this._updateId = setInterval(this._updateView.bind(this), conf.main.updateFreq);
+        this._updateId = setInterval(this._updateView.bind(this), 1000);
     }
 
     async _updateView()

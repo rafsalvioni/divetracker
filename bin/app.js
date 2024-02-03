@@ -92,8 +92,8 @@ const ViewHelper = {
         if (curStop) {
             return ViewHelper.formatTime(curStop.sec);
         }
-        else if (d.ascent && nextStop && nextStop.required) {
-            return `S ${nextStop.depth}m`;
+        else if (d.ascent && nextStop) {
+            return `${nextStop.required ? 'D' : 'S'}S ${nextStop.depth}m`;
         }
         else {
             return `ND ${ndt}`;
@@ -159,7 +159,7 @@ class MainActivity
                     document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
                 }
                 if (e.detail.active) {
-                    navigator.vibrate(conf.main.updateFreq * .5);
+                    navigator.vibrate(500);
                 }
             });
         });
@@ -167,7 +167,6 @@ class MainActivity
     
     run() {
         this._updateView();
-        this._updateId = setInterval(this._updateView.bind(this), conf.main.updateFreq);
         var app = this;
         document.getElementById('btStartTrack').addEventListener('click', () => {
             app.newTrack();
@@ -271,63 +270,109 @@ class MainActivity
         alert(str);
     }
 
-    async _updateView()
+    _updateView()
     {
-        let last = this.provider.last;
-        let model = {
-            position: last ? ViewHelper.formatPosition(last.pos) : '',
-            mode: this.provider.mode,
-            accur: last ? ViewHelper.formatDistance(last.accur) : ''
-        };
-        let intrack = !!this.track;
-        if (intrack) {
-            model.status = 'TRACKING';
-            model.speed = ViewHelper.formatSpeed(this.track.curSpeed);
-            model.dist = ViewHelper.formatDistance(this.track.dist);
-            model.time = ViewHelper.formatTime(this.track.duration);
-            model.depth = ViewHelper.formatDistance(dc.depth);
+        if (this._updateId) {
+            return;
         }
-        else {
-            model.status = 'IDLE';
-            model.speed = '0 m/s';
-            model.dist = '0 m';
-            model.time = ViewHelper.formatTime(0);
-            model.depth = 'N/D';
-        }
-        model.deco = ViewHelper.decoInfo(dc.dive);
-        model.btStartTrack = !intrack && !!gps.active;
-        model.btLogs = !intrack && hasLogs();
-        model.btCleanLogs = model.btLogs;
-        model.btStopTrack = !!intrack && !!gps.active;
-        model.btCalibrate = !intrack;
-        model.btDive      = !intrack;
-        model.btDistCounter = !intrack;
-        model.btPlan = model.btStartTrack;
-        model.btTank = false;
+        this._updateId = true;
 
-        if (dc.inDive) {
-            let mix = dc.dive.nextMix();
-            if (mix) {
-                model.btTank = `NT: ${mix.id}`;
-                document.getElementById('btTank').disabled = !dc.dive.isMixUsable(mix);
-            }
-        }
-
-        for (var attr in model) {
-            let el = document.getElementById(attr);
-            if (!el) {
-                continue;
-            }
-            else if (!model[attr]) {
-                el.style.display = 'none';
-            }
-            else {
-                el.style.display = '';
-                if (typeof(model[attr]) != 'boolean') {
-                    el.innerHTML = model[attr];
+        function _update(model)
+        {
+            for (var attr in model) {
+                let el = document.getElementById(attr);
+                if (!el) {
+                    continue;
+                }
+                else if (!model[attr]) {
+                    el.style.display = 'none';
+                }
+                else {
+                    el.style.display = '';
+                    if (typeof(model[attr]) != 'boolean') {
+                        el.innerHTML = model[attr];
+                    }
                 }
             }
         }
+
+        var me = this;
+
+        setInterval(async () => {
+            let last = me.provider.last;
+            let model = {
+                position: last ? ViewHelper.formatPosition(last.pos) : '',
+                mode: me.provider.mode,
+                accur: last ? ViewHelper.formatDistance(last.accur) : ''
+            };
+            let intrack = !!me.track;
+            if (intrack) {
+                model.status = 'TRACKING';
+                model.time   = ViewHelper.formatTime(me.track.duration);
+            }
+            else {
+                model.status = 'IDLE';
+                model.speed  = '0 m/s';
+                model.dist   = '0 m';
+                model.time   = '00:00:00';
+                model.depth  = 'N/D';
+            }
+
+            model.btTank = false;
+            if (dc.inDive) {
+                model.deco = ViewHelper.decoInfo(dc.dive);
+                let mix = dc.dive.nextMix();
+                if (mix) {
+                    model.btTank = `NT: ${mix.id}`;
+                    document.getElementById('btTank').disabled = !dc.dive.isMixUsable(mix);
+                }
+            }
+            
+            model.btStartTrack = !intrack && !!gps.active;
+            model.btLogs = !intrack && hasLogs();
+            model.btCleanLogs = model.btLogs;
+            model.btStopTrack = !!intrack && !!gps.active;
+            model.btCalibrate = !intrack;
+            model.btDive      = !intrack;
+            model.btDistCounter = !intrack;
+            model.btPlan = model.btStartTrack;
+
+            _update(model);
+        }, 1000); // By second
+
+        setInterval(async () => {
+            let model = {};
+            if (!dc.inDive) {
+                model.deco = ViewHelper.decoInfo(dc.dive);
+                _update(model);
+            }
+        }, 60000); // By minute
+
+        setInterval(async () => {
+            let model = {};
+            let intrack = !!me.track;
+            if (intrack) {
+                model.speed = ViewHelper.formatSpeed(this.track.curSpeed);
+                model.dist = ViewHelper.formatDistance(this.track.dist);
+                model.time = ViewHelper.formatTime(this.track.duration);
+                model.depth = ViewHelper.formatDistance(dc.depth);
+            }
+
+            _update(model);    
+        }, conf.track.calcPos * 1.05); // By track time
+
+        let model = {};
+        model.btStartTrack = !!gps.active;
+        model.btLogs = hasLogs();
+        model.btCleanLogs = model.btLogs;
+        model.btStopTrack = false;
+        model.btCalibrate = true;
+        model.btDive      = true;
+        model.btDistCounter = true;
+        model.btPlan = true;
+        model.btTank = false;
+        model.deco = ViewHelper.decoInfo(dc.dive);
+        _update(model); // Initial state
     }
 }
 

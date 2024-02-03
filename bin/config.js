@@ -32,7 +32,7 @@ const defaultConf = {
         },
     },
     track: {
-        calcPos: 5000, // Time, in millis, to update track position
+        calcPos: 2000, // Time, in millis, to update track position
         autoStartOnLostGps: true, // Auto start a track when GPS signal is lost
         forceImu: false, // Forces use of IMU instead GPS (for land tests...),
         minDist: 5, // Minimum distance to consider stay in a location
@@ -42,9 +42,7 @@ const defaultConf = {
         maxPpo2: 1.4,
         salt: true
     },
-    main: {
-        updateFreq: 1000 // Time, in millis, to update view
-    }
+    main: {}
 };
 
 const configKey = '_config_';
