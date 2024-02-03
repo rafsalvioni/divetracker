@@ -30,7 +30,7 @@
 
   var diveGraph = [];
   function addData(t, dive) {
-    diveGraph.push([t, -dive.depth, -dive.avgDepth, dive.decoState.ndt / 10]);
+    diveGraph.push([t, -dive.depth.cur, -dive.depth.avg, dive.decoState.ndt / 10]);
   }
 
   var dives = [
@@ -58,8 +58,8 @@
     }
   }
   console.log(`Deco Group: ${dive.decoState.group == 'N'}`);
-  console.log(`Max Depth: ${parseInt(dive.maxDepth) == 30}`);
-  console.log(`AVG Depth: ${parseInt(dive.avgDepth) == 19}`);
+  console.log(`Max Depth: ${parseInt(dive.depth.max) == 30}`);
+  console.log(`AVG Depth: ${parseInt(dive.depth.avg) == 19}`);
   dive.end();
   console.log(diveLogger.export());
     
