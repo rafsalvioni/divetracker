@@ -40,7 +40,8 @@ const defaultConf = {
     dc: {
         mixes: [], // No mix? Defaults AIR
         maxPpo2: 1.4,
-        salt: true
+        salt: true,
+        o2narco: true
     },
     main: {}
 };
