@@ -191,9 +191,9 @@ class MainActivity
         });
         document.getElementById('btTank').addEventListener('click', (e) => {
             if (dc.inDive) {
-                let mix = dc.dive.nextMix();
-                if (mix && dc.dive.isMixUsable(mix)) {
-                    dc.dive.changeMix(mix);
+                let tank;
+                if ((tank = dc.dive.nextTank()) && dc.dive.isMixUsable(tank.mix)) {
+                    dc.dive.changeTank(tank);
                     e.target.style.display = 'none';
                 }
             }
@@ -325,10 +325,10 @@ class MainActivity
             model.btTank = false;
             if (dc.inDive) {
                 model.deco = ViewHelper.decoInfo(dc.dive);
-                let mix = dc.dive.nextMix();
-                if (mix) {
-                    model.btTank = `NT: ${mix.id}`;
-                    document.getElementById('btTank').disabled = !dc.dive.isMixUsable(mix);
+                let tank = dc.dive.nextTank();
+                if (tank) {
+                    model.btTank = `NT: ${tank.mix.id}`;
+                    document.getElementById('btTank').disabled = !dc.dive.isMixUsable(tank.mix);
                 }
             }
             

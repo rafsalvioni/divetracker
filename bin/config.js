@@ -2,7 +2,7 @@
  * Default config
  * 
  */
-const defaultConf = {
+const DEFAULT_CONF = {
     gps: {
         minAccur: 10, // Minimal accuracy to trust in GPS
     },
@@ -38,15 +38,16 @@ const defaultConf = {
         minDist: 5, // Minimum distance to consider stay in a location
     },
     dc: {
-        mixes: [], // No mix? Defaults AIR
+        tanks: [], // No tank? Defaults with AIR
         maxPpo2: 1.4,
         salt: true,
-        o2narco: true
+        o2narco: true,
+        rmv: 15
     },
     main: {}
 };
 
-const configKey = '_config_';
+const CONFIG_STORAGE = '__config__';
 
 /**
  * Loads a config from localStorage, if there is one.
@@ -57,18 +58,18 @@ const configKey = '_config_';
  */
 function loadConfig()
 {
-    let ret = Object.assign({}, defaultConf);
+    let ret = Object.assign({}, DEFAULT_CONF);
     if (!window.localStorage) {
         return ret;
     }
     try {
-        let saved = localStorage.getItem(configKey);
+        let saved = localStorage.getItem(CONFIG_STORAGE);
         if (saved) {
             ret = Object.assign(ret, JSON.parse(saved));
         }
     } catch (e) {
         alert('Error reading config... Using the default one');
-        localStorage.removeItem(configKey);
+        localStorage.removeItem(CONFIG_STORAGE);
     }
     // Link to selected counter's settings
     ret.imu.counters.current = ret.imu.counters[ret.imu.counter];
@@ -87,9 +88,9 @@ export function saveConfig(append = {})
         return;
     }
 
-    let conf = Object.assign({}, defaultConf, AppConfig, append);
-    localStorage.setItem(configKey, JSON.stringify(conf));
-    if (localStorage[configKey]) {
+    let conf = Object.assign({}, DEFAULT_CONF, AppConfig, append);
+    localStorage.setItem(CONFIG_STORAGE, JSON.stringify(conf));
+    if (localStorage[CONFIG_STORAGE]) {
         alert('Config saved! Page will be reloaded');
         location.reload();
     }
@@ -102,7 +103,7 @@ export function saveConfig(append = {})
 export function restoreConfig()
 {
     if (confirm("Do you really restore configuration to default?")) {
-        localStorage.removeItem(configKey);
+        localStorage.removeItem(CONFIG_STORAGE);
         location.reload();
     }
 }
@@ -114,7 +115,7 @@ export function restoreConfig()
  */
 export function defaultConfig()
 {
-    return defaultConf;
+    return DEFAULT_CONF;
 }
 
 export const AppConfig = loadConfig();
