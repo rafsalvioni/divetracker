@@ -88,7 +88,7 @@ const ViewHelper = {
         }
         let curStop  = d.decoStops.current;
         let nextStop = d.decoStops.next;
-        let ndt = d.decoState.ndt;
+        let time     = d.timeLeft;
         if (curStop) {
             return ViewHelper.formatTime(curStop.sec);
         }
@@ -96,7 +96,7 @@ const ViewHelper = {
             return `${nextStop.required ? 'D' : 'S'}S ${nextStop.depth}m`;
         }
         else {
-            return `ND ${ndt}`;
+            return `TL ${time.time}(${time.source})`;
         }
     }
 }
@@ -358,7 +358,6 @@ class MainActivity
             if (intrack) {
                 model.speed = ViewHelper.formatSpeed(this.track.curSpeed);
                 model.dist = ViewHelper.formatDistance(this.track.dist);
-                model.time = ViewHelper.formatTime(this.track.duration);
                 model.depth = ViewHelper.formatDistance(dc.depth);
             }
 
