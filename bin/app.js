@@ -96,7 +96,7 @@ const ViewHelper = {
             return `${nextStop.required ? 'D' : 'S'}S ${nextStop.depth}m`;
         }
         else {
-            return `TL ${time.time}(${time.source})`;
+            return `(${time.source}) ${time.time}`;
         }
     }
 }
@@ -154,7 +154,7 @@ class MainActivity
             diveLogger.dive = dive;
             // Adds dive listeners to show alerts
             dive.addEventListener('alert', async (e) => {
-                let alerts = {'mod': 'depth', 'ndt': 'deco', 'stop': 'deco', 'ascent': 'speed'};
+                let alerts = {'mod': 'depth', 'time': 'deco', 'stop': 'deco', 'ascent': 'speed'};
                 if (alerts[e.detail.type]) {
                     document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
                 }
@@ -269,7 +269,7 @@ class MainActivity
         }
         str += `${i++}- (${plan.break})\n`;
         for (let p of plan.dives) {
-            str += `${i++}- Depth: ${p.depth} m, Time: ${p.time} min, EAD: ${p.ead}, RNT: ${p.rnt}\n`;
+            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time} min, EAD: ${p.ead}, RNT: ${p.rnt}\n`;
         }
         alert(str);
     }
