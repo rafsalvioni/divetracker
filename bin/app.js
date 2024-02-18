@@ -261,7 +261,7 @@ class MainActivity
     planDive()
     {
         let plan = dc.plan();
-        let str = `RNG: ${plan.rg ?? '-'}, Water: ${plan.water}, SP: ${plan.sp.round(2)} bar\n`;
+        let str = `Water: ${plan.water}, SP: ${plan.sp.round(2)} bar\n`;
         str += `Gas: ${plan.mix}, MOD: ${plan.mod}, pO2: ${plan.pO2}, CNS: ${plan.cns}%\n\n`;
         let i   = 0;
         if (!plan.dives.length) {
@@ -269,7 +269,7 @@ class MainActivity
         }
         str += `${i++}- (${plan.break})\n`;
         for (let p of plan.dives) {
-            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time} min, EAD: ${p.ead}, RNT: ${p.rnt}\n`;
+            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time} min\n`;
         }
         alert(str);
     }
