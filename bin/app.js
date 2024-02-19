@@ -92,8 +92,8 @@ const ViewHelper = {
         if (curStop) {
             return ViewHelper.formatTime(curStop.sec);
         }
-        else if (d.ascent && nextStop) {
-            return `${nextStop.required ? 'D' : 'S'}S ${nextStop.depth}m`;
+        else if (nextStop && nextStop.required) {
+            return `DS ${nextStop.depth}m`;
         }
         else {
             return `(${time.source}) ${time.time}`;
