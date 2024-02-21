@@ -88,7 +88,6 @@ const ViewHelper = {
         }
         let curStop  = d.decoStops.current;
         let nextStop = d.decoStops.next;
-        let time     = d.timeLeft;
         if (curStop) {
             return ViewHelper.formatTime(curStop.sec);
         }
@@ -96,6 +95,7 @@ const ViewHelper = {
             return `DS ${nextStop.depth}m`;
         }
         else {
+            let time = d.timeLeft;
             return `(${time.source}) ${time.time}`;
         }
     }
