@@ -261,7 +261,7 @@ class MainActivity
     planDive()
     {
         let plan = dc.plan();
-        let str = `Water: ${plan.water}, SP: ${plan.sp.round(2)} bar\n`;
+        let str = `Water: ${plan.water}, SP: ${plan.sp.round(2)} bar, RMV: ${plan.rmv} l/min\n`;
         str += `Gas: ${plan.mix}, MOD: ${plan.mod}, pO2: ${plan.pO2}, CNS: ${plan.cns}%\n\n`;
         let i   = 0;
         if (!plan.dives.length) {
