@@ -4,6 +4,7 @@
     "lang": "en-US",
     "start_url": "/divetracker/",
     "display": "standalone",
+    "orientation": "landscape",
     "icons": [
         {
             "src": "./icon/icon-192.png",

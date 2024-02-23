@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DiveTracker</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="DiveTracker">
+  <meta name="apple-mobile-web-app-title" content="DiveTracker">
+  <meta name="msapplication-starturl" content="/index.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="./bin/app.js" type="module" defer></script>
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<header>
+</header>
+<main>
+<table width="100%" heigth="100%">
+    <tr>
+        <td width="20%">
+            <table width="100%" id="tbPosition">
+                <tr><th colspan="2">Position</th></tr>
+                <tr>
+                    <td>Dir:</td>
+                    <td id="bearing">N/D</td>
+                </tr>
+                <tr>
+                    <td>Lat:</td>
+                    <td id="lat">N/D</td>
+                </tr>
+                <tr>
+                    <td>Lon:</td>
+                    <td id="lon">N/D</td>
+                </tr>
+                <tr>
+                    <td>Accur:</td>
+                    <td id="accur">N/D</td>
+                </tr>
+                <tr>
+                    <td>Prov:</td>
+                    <td id="posprov">N/D</td>
+                </tr>
+                <tr>
+                    <td>IMU:</td>
+                    <td id="imu"></td>
+                </tr>
+            </table>
+            <button type="button" id="btStartTrack">Start</button>
+            <button type="button" id="btStopTrack">Stop</button>
+            <button type="button" id="btCalibrate">Config IMU</button>
+            <br><br>
+            <button type="button" id="btLogs">Save Logs</button>
+            <button type="button" id="btCleanLogs">Clean Logs</button>
+        </td>
+        <td width="60%">
+            <div>
+                <video id="camera" width="100%" height="100%" style="float: left"></video>
+                <button id="take">Take Photo</button>
+            </div>
+        </td>
+        <td>
+            <table width="100%" id="tbAfter">
+                <tr><th colspan="2">After Dive</th></tr>
+                <tr>
+                    <td>SI:</td>
+                    <td id="si">N/D</td>
+                </tr>
+                <tr>
+                    <td>Fly:</td>
+                    <td id="nofly">N/D</td>
+                </tr>
+                <tr>
+                    <td>Dive:</td>
+                    <td id="nodive">N/D</td>
+                </tr>
+                <tr>
+                    <td>Desat:</td>
+                    <td>N/D</td>
+                </tr>
+            </table>
+            <table width="100%" id="tbTrack">
+                <tr><th colspan="2">Track</th></tr>
+                <tr>
+                    <td>Dur:</td>
+                    <td id="duration"></td>
+                </tr>
+                <tr>
+                    <td>Dist:</td>
+                    <td id="dist"></td>
+                </tr>
+                <tr>
+                    <td>Speed:</td>
+                    <td id="trackSpeed"></td>
+                </tr>
+                <tr>
+                    <td>Back:</td>
+                    <td id="gohome"></td>
+                </tr>
+            </table>
+            <table width="100%" id="tbDive">
+                <tr><th colspan="2">Dive</th></tr>
+                <tr>
+                    <td>Depth:</td>
+                    <td id="depth"></td>
+                </tr>
+                <tr>
+                    <td>TL:</td>
+                    <td id="timeleft"></td>
+                </tr>
+                <tr>
+                    <td>Deco:</td>
+                    <td id="deco"></td>
+                </tr>
+                <tr>
+                    <td>Speed:</td>
+                    <td id="depthSpeed"></td>
+                </tr>
+                <tr>
+                    <td>Gas:</td>
+                    <td id="gas"></td>
+                </tr>
+                <tr>
+                    <td>Bar:</td>
+                    <td id="bar"></td>
+                </tr>
+            </table>
+            <button type="button" id="btDive">Config DC</button>
+            <button type="button" id="btPlan">Plan</button>
+            <button type="button" id="btTank">Next Tank</button>
+        </td>
+    </tr>
+</table>
+<canvas id="photo" style="display: none"></canvas>
+    
+<script type="module">
+    import {Camera} from './lib/media.js';
+    const camera = new Camera(document.querySelector('#camera'));
+    document.querySelector('#take').addEventListener('click', () => {
+        camera.takePhoto(document.querySelector('#photo'));
+    });
+</script>
+</main>
+<footer>
+</footer>
+</body>
+</html>

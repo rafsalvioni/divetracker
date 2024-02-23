@@ -72,8 +72,8 @@ const ViewHelper = {
      * @param {number} s 
      * @returns string
      */
-    formatSpeed: (s) => {
-        return ViewHelper.formatDistance(s) + '/s';
+    formatSpeed: (s, t = 's') => {
+        return ViewHelper.formatDistance(s) + `/${t}`;
     },
 
     /**
@@ -94,7 +94,7 @@ const ViewHelper = {
             return `DS ${stop.depth}m`;
         }
         else {
-            return `N/A${stop.optional ? '*' : ''}`;
+            return `No${stop.optional ? '*' : ''}`;
         }
     }
 }
@@ -105,21 +105,8 @@ class MainActivity
 
         var me = this;
 
-        if (!('geolocation' in navigator)) {
-            throw 'GPS not supported!'; 
-        }
-        if (!('ondeviceorientationabsolute' in window)) {
-            throw 'Absolute orientation not supported!'; 
-        }
-        if (!('ondevicemotion' in window)) {
-            throw 'Device motion not supported!'; 
-        }
-
         // Default position provider;
         this.provider = fus;
-
-        // Loads the map
-        this.map = new DiveMap(document.getElementById('nav'));
 
         // Add listener for auto start
         gps.addEventListener('active', async (e) => {
@@ -136,15 +123,6 @@ class MainActivity
             }
         });
 
-        // Update Map bearing when orientation changes
-        orient.addEventListener('change', async (e) => {
-            let bearing = orient.roundAngle(e.detail.compG);
-            me.map.bearing = bearing;
-        });
-        // Logs POI in TrackLogger when added POI to map
-        me.map.addEventListener('poi', async (e) => {
-            trackLogger.logPoi(e.detail);
-        });
         // Listener when a dive is created
         dc.addEventListener('dive', (d) => {
             let dive = d.target.dive;
@@ -201,7 +179,6 @@ class MainActivity
                 }
             }
         });
-        document.getElementById('forceImu').value = !!conf.track.forceImu ? '1' : '0';
     }
 
     newTrack(auto=false)
@@ -225,9 +202,6 @@ class MainActivity
         if (!yesNo) {
             return;
         }
-        if (document.getElementById('forceImu').value == '1') {
-            this.provider = new ImuProvider(gps.last);
-        }
         var me = this;
         
         // New Track
@@ -235,7 +209,6 @@ class MainActivity
         // Updates DC and map from track
         track.addEventListener('change', async (e) => {
             dc.update(e.target);
-            me.map.fromProvider(me.provider.last);
         });
         // Sets position provider to auto update Track
         track.updateFrom(this.provider, conf.track.calcPos);
@@ -257,7 +230,6 @@ class MainActivity
                 dc.dive.end();
                 diveLogger.dive = null;
             }
-            this.map.clean();
         }
     }
 
@@ -310,27 +282,26 @@ class MainActivity
         setInterval(async () => {
             let last = me.provider.last;
             let model = {
-                position: last ? ViewHelper.formatPosition(last.pos) : '',
-                mode: me.provider.mode,
-                accur: last ? ViewHelper.formatDistance(last.accur) : ''
+                bearing: orient.active ? `${orient.roundAngle(orient.last.compG)}º` : 'N/D',
+                lat: last ? last.pos.lat : 'N/D',
+                lon: last ? last.pos.lon : 'N/D',
+                posprov: me.provider.mode,
+                accur: last ? ViewHelper.formatDistance(last.accur) : 'N/D',
+                imu: (orient.active && motion.active ? 'OK' : 'ERROR')
             };
+
             let intrack = !!me.track;
+            model.tbTrack = intrack;
             if (intrack) {
-                model.status = 'TRACKING';
-                model.time   = ViewHelper.formatTime(me.track.duration);
-            }
-            else {
-                model.status   = 'IDLE';
-                model.speed    = '0 m/s';
-                model.dist     = '0 m';
-                model.time     = '00:00:00';
-                model.timeLeft = 'N/D';
-                model.depth    = 'N/D';
+                model.duration = ViewHelper.formatTime(me.track.duration);
             }
 
+            model.tbDive = dc.inDive;
             model.btTank = false;
+            model.tbAfter = false;
             if (dc.inDive) {
                 model.deco = ViewHelper.decoInfo(dc.dive);
+                model.gas = dc.dive.tankId;
                 let tank = dc.dive.nextTank();
                 if (tank) {
                     model.btTank = `NT: ${tank.mix.name}`;
@@ -338,6 +309,9 @@ class MainActivity
                 }
                 const tl = dc.dive.timeLeft;
                 model.timeLeft = `(${tl.source}) ${tl.time}'`;
+            }
+            else if (dc.isDesat) {
+                model.tbAfter = true;
             }
             
             model.btStartTrack = !intrack && !!gps.active;
@@ -354,9 +328,12 @@ class MainActivity
 
         setInterval(async () => {
             let model = {};
-            if (!dc.inDive) {
-                model.deco = ViewHelper.decoInfo(dc.dive);
-                _update(model);
+            if (dc.isDesat) {
+                let state = dc.desatState;
+                model.si = ViewHelper.formatTime(state.si);
+                model.nofly = ViewHelper.formatTime(state.noFly);
+                model.nodive = ViewHelper.formatTime(state.noDive);
+                model.desat = ViewHelper.formatTime(state.desat);
             }
         }, 60000); // By minute
 
@@ -364,15 +341,25 @@ class MainActivity
             let model = {};
             let intrack = !!me.track;
             if (intrack) {
-                model.speed = ViewHelper.formatSpeed(this.track.curSpeed);
+                model.trackSpeed = ViewHelper.formatSpeed(this.track.curSpeed);
                 model.dist = ViewHelper.formatDistance(this.track.dist);
+                model.gohome = ViewHelper.formatTarget(this.track.toStart());
+            }
+            if (dc.inDive) {
                 model.depth = ViewHelper.formatDistance(dc.depth);
+                const TL = dc.dive.timeLeft;
+                model.timeLeft = `(${TL.source}) ${TL.time}`;
+                model.diveSpeed = ViewHelper.formatSpeed(dc.dive.speed, 'min');
+                model.bar = dc.curTank.end.round();
             }
 
             _update(model);    
         }, conf.track.calcPos * 1.05); // By track time
 
         let model = {};
+        model.tbDive  = false;
+        model.tbTrack = false;
+        model.tbAfter = dc.isDesat;
         model.btStartTrack = !!gps.active;
         model.btLogs = hasLogs();
         model.btCleanLogs = model.btLogs;
@@ -382,50 +369,17 @@ class MainActivity
         model.btDistCounter = true;
         model.btPlan = true;
         model.btTank = false;
-        model.deco = ViewHelper.decoInfo(dc.dive);
         _update(model); // Initial state
     }
 }
 
-function toogleDisplay(el, show=true) {
-    let _show = typeof(show) == 'boolean' ? show : !(el.style.display == 'none');
-    el.style.display = _show ? '' : 'none';
-}
-
-var main    = document.getElementById('main');
-var check   = document.getElementById('check');
-
-function _sensorsCheck(e)
-{
-    if (orient.active && motion.active) {
-        _error(null);
-    }
-    else {
-        _error('Sensor(s) failed!');
-    }
-}
-
-function _error(e) {
-    if (e) {
-        check.childNodes[0].innerHTML = e;
-        toogleDisplay(main, false);
-        toogleDisplay(check, true);
-    }
-    else {
-        toogleDisplay(main, true);
-        toogleDisplay(check, false);
-    }
-}
-
-//try {
+try {
     var mainApp = new MainActivity();
     mainApp.run();
-    orient.addEventListener('active', _sensorsCheck);
-    motion.addEventListener('active', _sensorsCheck);
-/*}
+}
 catch (e) {
-    _error(e);
-}*/
+    console.log(e);
+}
 
 if ('serviceWorker' in navigator && location.hostname != 'localhost') {
     navigator.serviceWorker

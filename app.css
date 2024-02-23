@@ -1,11 +1,11 @@
 body {
     background-color: #000;
     color: #fff;
-    font-size: 120%;
+    font-size: 80%;
 }
 
 button {
-    font-size: 110%;
+    /*font-size: 110%;*/
     background-color: #ccc; /* Green */
     border: none;
     padding: 10px 13px;
