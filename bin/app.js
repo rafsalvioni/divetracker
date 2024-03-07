@@ -269,7 +269,11 @@ class MainActivity
         }
         str += `${i++}- (${plan.break})\n`;
         for (let p of plan.dives) {
-            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time} min\n`;
+            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time} min`;
+            if (plan.mix != 'air') {
+                str += `, EAD: ${p.ead}, END: ${p.end}`;
+            }
+            str += "\n";
         }
         alert(str);
     }
