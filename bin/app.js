@@ -269,7 +269,7 @@ class MainActivity
         }
         str += `${i++}- (${plan.break})\n`;
         for (let p of plan.dives) {
-            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time} min`;
+            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time} min, BM: ${p.bestmix}`;
             if (plan.mix != 'air') {
                 str += `, EAD: ${p.ead}, END: ${p.end}`;
             }
