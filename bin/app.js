@@ -83,7 +83,7 @@ const ViewHelper = {
      */
     decoInfo: (d) => {
         if (!d || !d.active) {
-            let si = dc.desatState.si;
+            let si = dc.siState.si;
             return isFinite(si) ? `SI ${ViewHelper.formatTime(si)}` : 'N/A';
         }
         let curStop  = d.decoStops.current;
@@ -261,15 +261,16 @@ class MainActivity
     planDive()
     {
         let plan = dc.plan();
-        let str = `Water: ${plan.water}, SP: ${plan.sp.round(2)} bar, RMV: ${plan.rmv} l/min\n`;
-        str += `Gas: ${plan.mix}, MOD: ${plan.mod}, pO2: ${plan.pO2}, CNS: ${plan.cns}%\n\n`;
+        let str = `Water: ${plan.water}, SP: ${plan.sp.round(2)} bar, RMV: ${plan.rmv} l/min\n`; // Env
+        str += `Gas: ${plan.mix}, MOD: ${plan.mod}, pO2: ${plan.pO2}\n`; // GAS
+        str += `Satur: ${plan.satur}%, CNS: ${plan.cns}%, OTU: ${plan.otu}\n\n` // Body
         let i   = 0;
         if (!plan.dives.length) {
             str += `**** No dives allowed at this time ****\n\n`;
         }
         str += `${i++}- (${plan.break})\n`;
         for (let p of plan.dives) {
-            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time} min, BM: ${p.bestmix}`;
+            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time} min, ASC: ${p.asc} min, BM: ${p.bestmix}`;
             if (plan.mix != 'air') {
                 str += `, EAD: ${p.ead}, END: ${p.end}`;
             }
