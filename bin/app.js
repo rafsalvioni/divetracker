@@ -262,7 +262,7 @@ class MainActivity
     {
         let plan = dc.plan();
         let str = `Water: ${plan.water}, SP: ${plan.sp.round(2)} bar, RMV: ${plan.rmv} l/min\n`; // Env
-        str += `Gas: ${plan.mix}, MOD: ${plan.mod}, pO2: ${plan.pO2}\n`; // GAS
+        str += `Gas: ${plan.mix}, MOD: ${plan.mod}, MND: ${plan.mnd}, pO2: ${plan.pO2}\n`; // GAS
         str += `Satur: ${plan.satur}%, CNS: ${plan.cns}%, OTU: ${plan.otu}\n\n` // Body
         let i   = 0;
         if (!plan.dives.length) {
@@ -270,7 +270,7 @@ class MainActivity
         }
         str += `${i++}- (${plan.break})\n`;
         for (let p of plan.dives) {
-            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time} min, ASC: ${p.asc} min, BM: ${p.bestmix}`;
+            str += `${i++}- Depth: ${p.depth} m, BT: ${p.time}, ASC: ${p.asc}, BM: ${p.bestmix}`;
             if (plan.mix != 'air') {
                 str += `, EAD: ${p.ead}, END: ${p.end}`;
             }
