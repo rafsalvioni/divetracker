@@ -131,7 +131,7 @@ class MainActivity
             // Adds dive listeners to show alerts
             dive.addEventListener('sample', async (e) => {
                 let alerts = dive.alerts;
-                let trans  = {'mod': 'depth', 'time': 'timeLeft', 'stop': 'deco', 'ascent': 'speed'};
+                let trans  = {'mod': 'depth', 'time': 'timeleft', 'stop': 'deco', 'ascent': 'depthSpeed'};
                 for (const alert in trans) {
                     const active = alerts.indexOf(alert) >= 0;
                     const id = trans[alert] ?? null;
@@ -329,11 +329,10 @@ class MainActivity
         setInterval(async () => {
             let model = {};
             if (dc.isDesat) {
-                let state = dc.desatState;
+                let state = dc.siState;
                 model.si = ViewHelper.formatTime(state.si);
                 model.nofly = ViewHelper.formatTime(state.noFly);
                 model.nodive = ViewHelper.formatTime(state.noDive);
-                model.desat = ViewHelper.formatTime(state.desat);
             }
         }, 60000); // By minute
 
@@ -348,9 +347,9 @@ class MainActivity
             if (dc.inDive) {
                 model.depth = ViewHelper.formatDistance(dc.depth);
                 const TL = dc.dive.timeLeft;
-                model.timeLeft = `(${TL.source}) ${TL.time}`;
-                model.diveSpeed = ViewHelper.formatSpeed(dc.dive.speed, 'min');
-                model.bar = dc.curTank.end.round();
+                model.timeleft = `(${TL.source}) ${TL.time}`;
+                model.depthSpeed = ViewHelper.formatSpeed(dc.dive.speed, 'min');
+                model.bar = dc.dive.curTank.end.round();
             }
 
             _update(model);    
