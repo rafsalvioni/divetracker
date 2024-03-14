@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DiveTracker</title>
+  <!-- <link rel="manifest" href="manifest.json"> -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="DiveTracker">
+  <meta name="apple-mobile-web-app-title" content="DiveTracker">
+  <meta name="msapplication-starturl" content="/index.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<header>
+</header>
+<main>
+<script type="module">
+    import {BodyState} from './lib/physio.js';
+    import {GasMix, AIR} from './lib/dc.js';
+    const sp = 1.013;
+    let depth = 10;
+    let ndt;
+    do {
+        let body = new BodyState();
+        let deco = body.decoModel;
+        let satur = +deco;
+        body.addChange(1.013 + (depth * .101043));
+        ndt = deco.timeLeft();
+        body.addTime(ndt * 60);
+        let ceil1 = deco.ceiling();
+        body.addChange(sp);
+        let cns = +body.cns;
+        let otu = +body.otu;
+        satur = +deco;
+        let desat = deco.resetAfter();
+        body.applySI(desat);
+        let ceil2 = deco.ceiling();
+        satur = +deco;
+        console.log({depth, ndt, desat, cns, otu});
+        depth += .5;
+    } while (ndt > 0 && depth < 100);
+
+    const decoMix = []
+    const body = new BodyState();
+    const deco = body.decoModel;
+    body.addChange(1.013 + (40 * .101043));
+    console.log(deco.timeLeft());
+    body.addTime(35*60);
+    console.log(deco.timeLeft());
+    console.log(deco.stops(...decoMix));
+    let i = 0;
+    let stops = deco.stops(...decoMix);
+    let total = 0;
+    while (stops.length && ((i++) <= 50)) {
+        let stop = stops.shift();
+        total += stop.sec;
+        console.log(`GF after: ${deco.gf}`);
+        body.addChange(stop.bar, null, stop.mix);
+        body.addTime(stop.sec);
+        console.log(`Stop at ${stop.depth}m@${stop.sec / 60}min / GF ${stop.gf}`);
+        console.log(`GF before: ${deco.gf}`);
+        if (stop.depth == 56 && i == 3) {
+            body.addChange(stop.bar + 3);
+            body.addTime(600);
+            stops = deco.stops();
+        }
+        //console.log(`Satur: ${+deco}`);
+    }
+    console.log(total / 60);
+    console.log(deco.ceiling(deco.gfHigh));
+    console.log(deco.stops());
+    console.log(deco.canAscend);
+    //deco.addChange(1.013 + (10 * .101043));
+    console.log(deco.timeLeft(), body.cns * 100, +body.otu);
+</script>
+</main>
+<footer>
+</footer>
+</body>
+</html>

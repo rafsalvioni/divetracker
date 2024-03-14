@@ -42,7 +42,8 @@ const DEFAULT_CONF = {
         maxPpo2: 1.4,
         salt: true,
         o2narco: true,
-        rmv: 15
+        rmv: 15,
+        gfLow: .8
     },
     main: {}
 };

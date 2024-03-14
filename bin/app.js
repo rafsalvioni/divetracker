@@ -83,20 +83,19 @@ const ViewHelper = {
      */
     decoInfo: (d) => {
         if (!d || !d.active) {
-            let si = dc.siState.si;
+            let si = +dc.si;
             return isFinite(si) ? `SI ${ViewHelper.formatTime(si)}` : 'N/A';
         }
-        let curStop  = d.decoStops.current;
-        let nextStop = d.decoStops.next;
-        if (curStop) {
-            return ViewHelper.formatTime(curStop.sec);
+        const stop = d.decoStops.current;
+        if (stop.active) {
+            return ViewHelper.formatTime(stop.sec);
         }
-        else if (nextStop && nextStop.required) {
-            return `DS ${nextStop.depth}m`;
+        else if (stop.depth && !stop.optional) {
+            return `DS@${stop.depth}m`;
         }
         else {
             let time = d.timeLeft;
-            return `(${time.source}) ${time.time}`;
+            return `(${time.source}) ${time.time}${stop.optional ? '*' : ''}`;
         }
     }
 }
@@ -263,7 +262,7 @@ class MainActivity
         let plan = dc.plan();
         let str = `Water: ${plan.water}, SP: ${plan.sp.round(2)} bar, RMV: ${plan.rmv} l/min\n`; // Env
         str += `Gas: ${plan.mix}, MOD: ${plan.mod}, MND: ${plan.mnd}, pO2: ${plan.pO2}\n`; // GAS
-        str += `Satur: ${plan.satur}%, CNS: ${plan.cns}%, OTU: ${plan.otu}\n\n` // Body
+        str += `GF: ${plan.gf}, Satur: ${plan.satur}%, CNS: ${plan.cns}%, OTU: ${plan.otu}\n\n` // Body
         let i   = 0;
         if (!plan.dives.length) {
             str += `**** No dives allowed at this time ****\n\n`;
@@ -414,15 +413,15 @@ function _error(e) {
     }
 }
 
-try {
+//try {
     var mainApp = new MainActivity();
     mainApp.run();
     orient.addEventListener('active', _sensorsCheck);
     motion.addEventListener('active', _sensorsCheck);
-}
+/*}
 catch (e) {
     _error(e);
-}
+}*/
 
 if ('serviceWorker' in navigator && location.hostname != 'localhost') {
     navigator.serviceWorker
