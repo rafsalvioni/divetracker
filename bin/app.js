@@ -90,12 +90,11 @@ const ViewHelper = {
         if (stop.active) {
             return ViewHelper.formatTime(stop.sec);
         }
-        else if (stop.depth && !stop.optional) {
-            return `DS@${stop.depth}m`;
+        else if (stop.depth) {
+            return `${stop.optional ? 'S' : 'D'}S ${stop.depth}m`;
         }
         else {
-            let time = d.timeLeft;
-            return `(${time.source}) ${time.time}${stop.optional ? '*' : ''}`;
+            return 'N/A';
         }
     }
 }
@@ -153,7 +152,7 @@ class MainActivity
             diveLogger.dive = dive;
             // Adds dive listeners to show alerts
             dive.addEventListener('alert', async (e) => {
-                let alerts = {'mod': 'depth', 'time': 'deco', 'stop': 'deco', 'ascent': 'speed'};
+                let alerts = {'mod': 'depth', 'time': 'timeLeft', 'stop': 'deco', 'ascent': 'speed'};
                 if (alerts[e.detail.type]) {
                     document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
                 }
@@ -316,11 +315,12 @@ class MainActivity
                 model.time   = ViewHelper.formatTime(me.track.duration);
             }
             else {
-                model.status = 'IDLE';
-                model.speed  = '0 m/s';
-                model.dist   = '0 m';
-                model.time   = '00:00:00';
-                model.depth  = 'N/D';
+                model.status   = 'IDLE';
+                model.speed    = '0 m/s';
+                model.dist     = '0 m';
+                model.time     = '00:00:00';
+                model.timeLeft = 'N/D';
+                model.depth    = 'N/D';
             }
 
             model.btTank = false;
@@ -331,6 +331,8 @@ class MainActivity
                     model.btTank = `NT: ${tank.mix.id}`;
                     document.getElementById('btTank').disabled = !dc.dive.isMixUsable(tank.mix);
                 }
+                const tl = dc.dive.timeLeft;
+                model.timeLeft = `(${tl.source}) ${tl.time}'`;
             }
             
             model.btStartTrack = !intrack && !!gps.active;
