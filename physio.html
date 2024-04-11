@@ -20,7 +20,7 @@
 <main>
 <script type="module">
     import {BodyState} from './lib/physio.js';
-    import {GasMix, AIR} from './lib/dc.js';
+    import {GasMix, AIR, diveTest} from './lib/dc.js';
     const sp = 1.013;
     let depth = 10;
     let ndt;
@@ -44,13 +44,17 @@
         depth += .5;
     } while (ndt > 0 && depth < 100);
 
+    const dive    = diveTest();
     const decoMix = []
-    const body = new BodyState();
+    const body = dive.bodyState;
     const deco = body.decoModel;
-    body.addChange(1.013 + (40 * .101043));
-    console.log(deco.timeLeft());
-    body.addTime(35*60);
-    console.log(deco.timeLeft());
+    dive.addSample(40);
+    console.log(dive.timeLeft);
+    dive.addSample(40, 35*60);
+    console.log(dive.timeLeft);
+    console.log(dive.ascSteps());
+    console.log(dive.ascTime());
+    console.log(dive.ascTime(5));
     console.log(deco.stops(...decoMix));
     let i = 0;
     let stops = deco.stops(...decoMix);
@@ -75,7 +79,7 @@
     console.log(deco.stops());
     console.log(deco.canAscend);
     //deco.addChange(1.013 + (10 * .101043));
-    console.log(deco.timeLeft(), body.cns * 100, +body.otu);
+    console.log(dive.timeLeft, body.cns * 100, +body.otu);
 </script>
 </main>
 <footer>

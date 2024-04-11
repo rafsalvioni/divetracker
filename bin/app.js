@@ -90,11 +90,11 @@ const ViewHelper = {
         if (stop.active) {
             return ViewHelper.formatTime(stop.sec);
         }
-        else if (stop.depth) {
-            return `${stop.optional ? 'S' : 'D'}S ${stop.depth}m`;
+        else if (stop.depth && !stop.optional) {
+            return `DS ${stop.depth}m`;
         }
         else {
-            return 'N/A';
+            return `N/A${stop.optional ? '*' : ''}`;
         }
     }
 }
@@ -151,13 +151,18 @@ class MainActivity
             // Add dive to logger
             diveLogger.dive = dive;
             // Adds dive listeners to show alerts
-            dive.addEventListener('alert', async (e) => {
-                let alerts = {'mod': 'depth', 'time': 'timeLeft', 'stop': 'deco', 'ascent': 'speed'};
-                if (alerts[e.detail.type]) {
-                    document.getElementById(alerts[e.detail.type]).style = 'color: {0}'.format(e.detail.active ? '#ff0000' : 'inherit');
-                }
-                if (e.detail.active) {
-                    navigator.vibrate(500);
+            dive.addEventListener('sample', async (e) => {
+                let alerts = dive.alerts;
+                let trans  = {'mod': 'depth', 'time': 'timeLeft', 'stop': 'deco', 'ascent': 'speed'};
+                for (const alert in trans) {
+                    const active = alerts.indexOf(alert) >= 0;
+                    const id = trans[alert] ?? null;
+                    if (id) {
+                        document.getElementById(id).style = 'color: {0}'.format(active ? '#ff0000' : 'inherit');
+                    }
+                    if (active) {
+                        navigator.vibrate(500);
+                    }
                 }
             });
         });
