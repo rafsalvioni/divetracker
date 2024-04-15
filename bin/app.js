@@ -333,7 +333,7 @@ class MainActivity
                 model.deco = ViewHelper.decoInfo(dc.dive);
                 let tank = dc.dive.nextTank();
                 if (tank) {
-                    model.btTank = `NT: ${tank.mix.id}`;
+                    model.btTank = `NT: ${tank.mix.name}`;
                     document.getElementById('btTank').disabled = !dc.dive.isMixUsable(tank.mix);
                 }
                 const tl = dc.dive.timeLeft;
