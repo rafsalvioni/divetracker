@@ -282,10 +282,18 @@ class MainActivity
 
         var me = this;
 
+        orient.addEventListener('change', (e) => {
+            _update({bearing: `${orient.roundAngle(e.detail.compG)}º`})
+        });
+        orient.addEventListener('active', (e) => {
+            if (!e.target.active) {
+                _update({bearing: `N/D`});
+            }
+        });
+
         setInterval(async () => {
             let last = me.provider.last;
             let model = {
-                bearing: orient.active ? `${orient.roundAngle(orient.last.compG)}º` : 'N/D',
                 lat: last ? last.pos.lat : 'N/D',
                 lon: last ? last.pos.lon : 'N/D',
                 posprov: me.provider.mode,
