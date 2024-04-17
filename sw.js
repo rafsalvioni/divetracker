@@ -4,6 +4,7 @@ const STATIC_CACHE_URLS = [
     root,
     root + 'app.css',
     root + 'imu.html',
+    root + 'camera.html',
     root + 'bin/app.js',
     root + 'bin/config.js',
     root + 'bin/imu.js',

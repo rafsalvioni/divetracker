@@ -2,7 +2,7 @@
     "name": "DiveTracker - A position tracker for scuba divers!",
     "short_name": "DiveTracker",
     "lang": "en-US",
-    "start_url": "/divetracker/",
+    "start_url": "/divetracker/camera.html",
     "display": "standalone",
     "orientation": "landscape",
     "icons": [
