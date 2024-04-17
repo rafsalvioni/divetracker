@@ -202,7 +202,6 @@ class MainActivity
         if (!yesNo) {
             return;
         }
-        var me = this;
         
         // New Track
         let track = new Track();
@@ -210,6 +209,10 @@ class MainActivity
         track.addEventListener('change', async (e) => {
             dc.update(e.target);
         });
+        
+        if (document.getElementById('ckImu').checked) {
+            this.provider = new ImuProvider(gps.last);
+        }
         // Sets position provider to auto update Track
         track.updateFrom(this.provider, conf.track.calcPos);
         // When there is a provider, add to logger
